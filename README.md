@@ -3,7 +3,7 @@ sebastian_tsang:
   now: Data & AI Developer @ BMO
   next: AI & Data Consultant @ EY (Summer '26)
   building: OpenClaw agents · Idea OS
-  based_in: Toronto / Guelph
+  based_in: Toronto
 ```
 
 # Sebastian Tsang
