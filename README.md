@@ -34,7 +34,7 @@ At work I'm writing a spec-to-DAG pipeline at BMO that generates Airflow orchest
 
 ### Beyond code
 
-Spent a year as President of UofG Toastmasters. Was Interac's first-ever Intern of the Quarter. Before the data engineering track, did contract growth work helping scale [Stan](https://stan.store) to $10M ARR. I like building things other people actually use, and I talk about them without making you sit through a demo.
+Spent a year as President of UofG Toastmasters. Was Interac's first-ever Intern of the Quarter. Recently did contract growth work helping scale [Stanley](https://stanley.stan.store/) to $10M ARR. I like building with AI that automate people's lives.
 
 ### Reach me
 
