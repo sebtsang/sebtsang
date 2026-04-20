@@ -2,7 +2,7 @@
 sebastian_tsang:
   now: Data & AI Developer @ BMO
   next: AI & Data Consultant @ EY (Summer '26)
-  building: OpenClaw agents · Idea OS
+  building: Idea OS (on OpenClaw)
   based_in: Toronto
 ```
 
@@ -27,8 +27,7 @@ Data & AI Developer @ BMO · CS @ University of Guelph · Incoming AI & Data Con
 
 | Project | Description | Stack |
 | --- | --- | --- |
-| **OpenClaw** | Personal AI agent framework — persistent memory, Discord/Telegram gateways, local LLM + cloud fallbacks | TypeScript · Claude SDK · MCP |
-| **Idea OS** | Capture-to-draft pipeline — ideas in from Discord/Telegram, structured research out, LinkedIn-ready drafts | Python · Claude · MCP |
+| **Idea OS** | Capture-to-draft pipeline on [OpenClaw](https://github.com/openclaw/openclaw) — ideas in from Discord/Telegram, structured research out, LinkedIn-ready drafts | Python · Claude · OpenClaw |
 
 ### 🎓 Education
 
@@ -40,12 +39,7 @@ President of UofG Toastmasters for a year. Interac's first-ever Intern of the Qu
 
 ---
 
-<p>
-  <a href="mailto:sebrtsang@gmail.com" title="Email"><img src="https://cdn.simpleicons.org/gmail/EA4335" height="26" alt="Email" /></a>
-  &nbsp;
-  <a href="https://linkedin.com/in/sebtsang" title="LinkedIn"><img src="https://cdn.simpleicons.org/linkedin/0A66C2" height="26" alt="LinkedIn" /></a>
-  &nbsp;
-  <a href="https://x.com/sebrtsang" title="X / Twitter"><img src="https://cdn.simpleicons.org/x/1DA1F2" height="26" alt="X" /></a>
-  &nbsp;
-  <a href="https://github.com/sebtsang" title="GitHub"><img src="https://cdn.simpleicons.org/github/8b949e" height="26" alt="GitHub" /></a>
-</p>
+[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:sebrtsang@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/sebtsang)
+[![X](https://img.shields.io/badge/X-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/sebrtsang)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/sebtsang)
