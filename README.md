@@ -12,30 +12,40 @@ Data & AI Developer @ BMO · CS @ University of Guelph · Incoming AI & Data Con
 
 ---
 
-### Currently
+### 👔 Experience
 
-Building OpenClaw-based agent systems — a personal AI runtime with persistent memory, multi-surface orchestration (Discord / Telegram / CLI), and a vault-backed memory layer. Also working on **Idea OS**: a pipeline that catches ideas on the fly, researches context around them, and drafts outputs (LinkedIn posts, docs) end-to-end.
+| Role | Company | Focus | Dates |
+| --- | --- | --- | --- |
+| **AI & Data Consultant (Incoming)** | **EY** | **AI & Data** | **May 2026 — Sep 2026** |
+| Data & AI Developer | BMO Financial Group | Airflow DAG automation | Jan 2026 — Apr 2026 |
+| Data Engineer | Interac Corp. | PL/SQL pipelines, CI/CD | May 2025 — Aug 2025 |
+| Data Analyst | Interac Corp. | IT Ops reporting automation | Sep 2024 — Apr 2025 |
+| Data Engineer | Spirit of Math | Medallion lakehouse in Fabric | May 2024 — Aug 2024 |
+| Growth (contract) | [Stanley](https://stanley.stan.store/) | Scaled to $10M ARR | 2023 |
 
-At work I'm writing a spec-to-DAG pipeline at BMO that generates Airflow orchestration from ingestion specs.
+### 🛠️ Projects
 
-### Shipped
+| Project | Description | Stack |
+| --- | --- | --- |
+| **OpenClaw** | Personal AI agent framework — persistent memory, Discord/Telegram gateways, local LLM + cloud fallbacks | TypeScript · Claude SDK · MCP |
+| **Idea OS** | Capture-to-draft pipeline — ideas in from Discord/Telegram, structured research out, LinkedIn-ready drafts | Python · Claude · MCP |
 
-- **OpenClaw** — personal AI agent framework; persistent memory, Discord/Telegram gateways, local LLM + cloud fallbacks. `TypeScript · Claude SDK · MCP`
-  → [link]
+### 🎓 Education
 
-- **Idea OS** — capture-to-draft pipeline: ideas in from Discord/Telegram, structured research out, LinkedIn-ready drafts. `Python · Claude · MCP`
-  → [link]
-
-- **\<project 3\>** — \<one-liner\>. `<stack>`
-  → [link]
-
-- **\<project 4\>** — \<one-liner\>. `<stack>`
-  → [link]
+**B.Comp. Computer Science** @ University of Guelph · Dean's Honour List · GPA 3.5 / 4.0 · Expected Apr 2027
 
 ### Beyond code
 
-Spent a year as President of UofG Toastmasters. Was Interac's first-ever Intern of the Quarter. Recently did contract growth work helping scale [Stanley](https://stanley.stan.store/) to $10M ARR. I like building with AI that automate people's lives.
+President of UofG Toastmasters for a year. Interac's first-ever Intern of the Quarter. Judged UofTHacks 13 (600+ participants). I like building with AI that automates people's lives.
 
-### Reach me
+---
 
-[sebrtsang@gmail.com](mailto:sebrtsang@gmail.com) · [linkedin.com/in/sebtsang](https://linkedin.com/in/sebtsang) · [@sebrtsang](https://x.com/sebrtsang)
+<p>
+  <a href="mailto:sebrtsang@gmail.com" title="Email"><img src="https://cdn.simpleicons.org/gmail/EA4335" height="26" alt="Email" /></a>
+  &nbsp;
+  <a href="https://linkedin.com/in/sebtsang" title="LinkedIn"><img src="https://cdn.simpleicons.org/linkedin/0A66C2" height="26" alt="LinkedIn" /></a>
+  &nbsp;
+  <a href="https://x.com/sebrtsang" title="X / Twitter"><img src="https://cdn.simpleicons.org/x/1DA1F2" height="26" alt="X" /></a>
+  &nbsp;
+  <a href="https://github.com/sebtsang" title="GitHub"><img src="https://cdn.simpleicons.org/github/8b949e" height="26" alt="GitHub" /></a>
+</p>
