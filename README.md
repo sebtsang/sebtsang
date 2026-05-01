@@ -19,7 +19,7 @@ Data & AI Developer @ BMO · CS @ University of Guelph · Incoming AI & Data Con
 | **AI & Data Consultant (Incoming)** | **EY** | **AI & Data** | **May 2026 — Sep 2026** |
 | AI Engineer | Polarity | Frontier AI QA research (Afore Capital fellowship) | Apr 2026 — Present |
 | Data & AI Developer | BMO Financial Group | Airflow DAG automation | Jan 2026 — Apr 2026 |
-| Growth Fellow | [Stan](https://stan.store) | Scaled [Stanley](https://stanley.stan.store/) to $10M ARR | Mar 2026 — Apr 2026 |
+| Growth Fellow | [Stan](https://stan.store) | Scaling [Stanley](https://stanley.stan.store/) to $10M ARR | Mar 2026 — Apr 2026 |
 | Data Engineer | Interac Corp. | PL/SQL pipelines, CI/CD | May 2025 — Aug 2025 |
 | Data Analyst, IT Ops | Interac Corp. | Reporting automation, Tableau | Sep 2024 — Apr 2025 |
 | Data Engineer | Spirit of Math | Medallion lakehouse in Fabric | May 2024 — Aug 2024 |
