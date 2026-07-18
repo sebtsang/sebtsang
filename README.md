@@ -1,8 +1,6 @@
 ```yaml
 sebastian_tsang:
-  now: Data & AI Developer @ BMO
-  next: AI & Data Consultant @ EY (Summer '26)
-  building: Idea OS (on OpenClaw)
+  now: AI & Data Consultant @ EY (Summer '26)
   based_in: Toronto
 ```
 
