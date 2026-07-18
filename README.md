@@ -1,5 +1,5 @@
 ```yaml
-sebastian_tsang:
+sebtsang:
   now: AI & Data Consultant @ EY (Summer '26)
   based_in: Toronto
 ```
