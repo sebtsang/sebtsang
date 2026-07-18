@@ -6,7 +6,7 @@ sebtsang:
 
 # Sebastian Tsang
 
-Data & AI Developer @ BMO · CS @ University of Guelph · Incoming AI & Data Consultant @ EY (Summer 2026)
+AI & Data Consultant @ EY · CS @ University of Guelph · Prev. @ Interac, BMO
 
 ---
 
