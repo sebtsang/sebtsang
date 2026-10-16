@@ -7,7 +7,7 @@ function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx*=.15;made++;streak++;best=Math.max(best,streak);try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:118,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
-function shoot(dx,dy,ms){if(phase!=='ready')return;if(dy<15){drag=null;return}const speed=dy/Math.max(ms,90)*1000;ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-Math.max(365,Math.min(550,310+dy*.85+speed*.045));const flight=(-ball.vy+Math.sqrt(Math.max(0,ball.vy**2-2*gravity*(home.y-rimY))))/gravity;ball.vx-=135;ball.ax=270/flight;phase='flight';shotStarted=clock;drag=null;message('…')}
+function shoot(dx,dy,ms){if(phase!=='ready')return;if(dy<15){drag=null;return}const speed=dy/Math.max(ms,90)*1000;ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-Math.max(365,Math.min(550,310+dy*.85+speed*.045));phase='flight';shotStarted=clock;drag=null;message('…')}
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||Math.hypot(p.x-ball.x,p.y-ball.y)>42)return;drag={start:p,end:p,time:performance.now(),id:e.pointerId};canvas.setPointerCapture(e.pointerId);e.preventDefault()});
 canvas.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)drag.end=point(e)});
@@ -16,7 +16,7 @@ canvas.addEventListener('pointercancel',()=>{drag=null});canvas.addEventListener
 canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();shoot(0,120,260)}});
 function tick(dt){clock+=dt;net=Math.max(0,net-dt*2);if(phase==='flight'||phase==='result'){const oldY=ball.y;ball.vy+=gravity*dt;ball.x+=ball.vx*dt+ball.ax*dt*dt/2;ball.vx+=ball.ax*dt;ball.y+=ball.vy*dt;ball.rotation+=ball.vx*dt*.02;
  if(phase==='flight'){
- // The side-on arc clears the net on ascent and arrives over the rim on descent.
+ // Rising shots are in front of the hoop; descending shots enter behind the front rim.
  // Score only when the entire ball fits through the hoop, travelling down.
  if(ball.vy>0&&oldY<rimY&&ball.y>=rimY&&Math.abs(ball.x-240)<10){ball.scored=true;finish(true)}
  else{for(const x of [220,260]){const dx=ball.x-x,dy=ball.y-rimY,d=Math.hypot(dx,dy);if(d<ball.r+2&&d>0){const nx=dx/d,ny=dy/d,dot=ball.vx*nx+ball.vy*ny;if(dot<0){ball.vx-=1.6*dot*nx;ball.vy-=1.6*dot*ny;ball.x=x+nx*(ball.r+2);ball.y=rimY+ny*(ball.r+2)}}}
@@ -41,7 +41,10 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  const sag=net*5*Math.sin(clock*28);for(let i=0;i<6;i++){const x=221+i*7.6;line([[x,120],[232+i*3.3+sag,145]],'#cbd2ad')}line([[222,129],[258,129]],'#a7baa0');line([[227,138],[253,138]],'#a7baa0');
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(drag){const dx=drag.end.x-drag.start.x,dy=drag.end.y-drag.start.y;ctx.setLineDash([2,5]);line([[ball.x,ball.y],[ball.x+dx*.55,ball.y+Math.max(-135,dy*.55)]],'#e1cda7',2);ctx.setLineDash([])}
- drawBall(ball.x,ball.y,ball.r,ball.rotation);rect(218,117,44,3,'#e99a61');rect(220,120,40,2,'#a95435');
+ const rising=phase==='flight'&&ball.vy<0;
+ if(!rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
+ rect(218,117,44,3,'#e99a61');rect(220,120,40,2,'#a95435');
+ if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(phase==='ready'&&!drag){ctx.fillStyle='#c8d3b1';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('FLICK TO SHOOT',240,270);const bob=Math.round(Math.sin(clock*3)*2);line([[238,277+bob],[240,275+bob],[242,277+bob]],'#c8d3b1')}
 }
