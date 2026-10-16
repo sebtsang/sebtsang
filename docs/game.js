@@ -6,7 +6,7 @@ try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx*=.15;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
 function shoot(dx,dy,ms){if(phase!=='ready')return;if(dy<15){drag=null;return}const speed=dy/Math.max(ms,90)*1000;ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-Math.max(365,Math.min(550,310+dy*.85+speed*.045));phase='flight';shotStarted=clock;drag=null;message('…')}
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||Math.hypot(p.x-ball.x,p.y-ball.y)>42)return;drag={start:p,end:p,time:performance.now(),id:e.pointerId};canvas.setPointerCapture(e.pointerId);e.preventDefault()});
@@ -41,13 +41,28 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(drag){const dx=drag.end.x-drag.start.x,dy=drag.end.y-drag.start.y;ctx.setLineDash([2,5]);line([[ball.x,ball.y],[ball.x+dx*.55,ball.y+Math.max(-135,dy*.55)]],'#e1cda7',2);ctx.setLineDash([])}
  const rising=phase==='flight'&&ball.vy<0;
- if(!rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
+ if(!rising){
+  // Keep the scored ball inside the net silhouette until it emerges below it.
+  ctx.save();
+  if(ball.scored&&ball.y-ball.r<rimY+27){
+   ctx.beginPath();ctx.moveTo(220,0);ctx.lineTo(260,0);ctx.lineTo(260,rimY+2);ctx.lineTo(250,rimY+27);ctx.lineTo(W,rimY+27);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.lineTo(0,rimY+27);ctx.lineTo(230,rimY+27);ctx.lineTo(220,rimY+2);ctx.closePath();ctx.clip();
+  }
+  drawBall(ball.x,ball.y,ball.r,ball.rotation);ctx.restore();
+ }
  // Net flexes briefly after a basket.
- const sag=net*5*Math.sin(clock*28);for(let i=0;i<6;i++){const x=221+i*7.6;line([[x,rimY+2],[232+i*3.3+sag,rimY+27]],'#cbd2ad')}line([[222,rimY+11],[258,rimY+11]],'#a7baa0');line([[227,rimY+20],[253,rimY+20]],'#a7baa0');
+ const sag=net*3*Math.sin(clock*28);
+ for(let i=0;i<7;i++){
+  const x=220+i*40/6,bottom=230+i*20/6+sag;
+  line([[x,rimY+2],[bottom,rimY+27]],'#e0e5c6',1.5);
+ }
+ for(let row=1;row<=4;row++){
+  const y=rimY+2+row*6,t=row*6/25;
+  line([[220+10*t,y],[260-10*t,y]],'#d4ddbc',1.5);
+ }
  rect(218,rimY-2,44,3,'#e99a61');rect(220,rimY+1,40,2,'#a95435');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
- if(phase==='ready'&&!drag){ctx.fillStyle='#c8d3b1';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('FLICK TO SHOOT',240,270);const bob=Math.round(Math.sin(clock*3)*2);line([[238,277+bob],[240,275+bob],[242,277+bob]],'#c8d3b1')}
+ if(!captureMode&&phase==='ready'&&!drag){ctx.fillStyle='#c8d3b1';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('FLICK TO SHOOT',240,270);const bob=Math.round(Math.sin(clock*3)*2);line([[238,277+bob],[240,275+bob],[242,277+bob]],'#c8d3b1')}
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();

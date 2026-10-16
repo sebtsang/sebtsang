@@ -10,4 +10,4 @@ AI Engineer @ [FriedmannAI](https://www.friedmann.ai/) · Toronto
 
 [Website](https://www.sebastiantsang.com) · [LinkedIn](https://www.linkedin.com/in/sebtsang/) · [X](https://x.com/sebrtsang) · [Email](mailto:sebrtsang@gmail.com)
 
-<a href="https://sebtsang.github.io/sebtsang/"><img src="docs/preview.gif" width="640" alt="Play Half Court - flick to shoot a pixel basketball." /></a>
+<a href="https://sebtsang.github.io/sebtsang/"><img src="docs/preview.gif" width="400" alt="Play Half Court - flick to shoot a pixel basketball." /></a>
