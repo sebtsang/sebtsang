@@ -124,7 +124,6 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   }
  }
  line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#25272b',2);
- rect(188,107,104,99,'#292c30');
  // A static pool of warm light keeps the floor dimensional without flicker.
  ctx.save();ctx.beginPath();ctx.rect(26,103,428,232);ctx.clip();
  ctx.translate(240,145);ctx.scale(1.65,1);
@@ -133,7 +132,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  light.addColorStop(.55,'rgba(255,239,205,.055)');
  light.addColorStop(1,'rgba(255,239,205,0)');
  ctx.fillStyle=light;ctx.fillRect(-155,-155,310,310);ctx.restore();
- line([[188,107],[188,206],[292,206],[292,107]],'#f1f0ea',2);
+ line([[188,107],[188,206],[292,206],[292,107]],'#25272b',2);
  ctx.strokeStyle='#25272b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#25272b',2);line([[411,107],[411,127]],'#25272b',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
  rect(237,48,6,63,'#111317');
