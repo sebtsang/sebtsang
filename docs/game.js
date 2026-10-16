@@ -142,7 +142,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  line([[211,76],[221,70]],'rgba(255,255,255,.20)',2);
  line([[214,82],[234,70]],'rgba(255,255,255,.10)',2);
  line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);
- ctx.fillStyle='#08090b66';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
+ if(phase==='ready'){ctx.fillStyle='#08090b66';ctx.beginPath();ctx.ellipse(ball.x,313,13,3,0,0,Math.PI*2);ctx.fill();}
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
   const angle=Math.atan2(Math.sin(aimPhase)*aimWidth,home.y-rimY);
