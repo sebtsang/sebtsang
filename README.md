@@ -1,6 +1,6 @@
 ### Hey, I'm Seb
 
-<img src="https://www.google.com/s2/favicons?domain=friedmann.ai&sz=32" width="16" height="16" alt="FriedmannAI"/> AI Engineer @ [FriedmannAI](https://www.friedmann.ai/) · Toronto
+<img src="https://www.google.com/s2/favicons?domain=friedmann.ai&sz=32" width="16" height="16" alt="FriedmannAI"/> AI Engineer @ [FriedmannAI](https://www.friedmann.ai/)
 
 <img src="https://www.google.com/s2/favicons?domain=ey.com&sz=32" width="16" height="16" alt=""/> Prev. AI & Data Consultant Intern @ [EY](https://www.ey.com/) - enterprise AI & data in financial services.<br>
 <img src="https://www.google.com/s2/favicons?domain=bmo.com&sz=32" width="16" height="16" alt=""/> Prev. Data & AI Developer Intern @ [BMO](https://www.bmo.com/) - Airflow orchestration automation.<br>
