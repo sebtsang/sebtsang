@@ -166,16 +166,18 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   }
   drawBall(ball.x,ball.y,ball.r,ball.rotation);ctx.restore();
  }
+ // Use one neutral white for every strand, including the bottom seam.
+ const netColor='#f2f2f2';
  // The top stays fixed to the rim while the woven net stretches and settles.
  for(let i=0;i<7;i++){
   const topX=220+i*40/6;
   const bottomX=240-mesh.halfWidth+mesh.sway+i*mesh.halfWidth*2/6;
-  line([[topX,rimY+2],[bottomX,mesh.bottomY]],'#e3e3dd',1.5);
+  line([[topX,rimY+2],[bottomX,mesh.bottomY]],netColor,1.5);
  }
  for(let row=1;row<=4;row++){
   const t=row/4,y=rimY+2+(mesh.bottomY-rimY-2)*t;
   const halfWidth=20+(mesh.halfWidth-20)*t,center=240+mesh.sway*t;
-  line([[center-halfWidth,y],[center+halfWidth,y]],'#d8d8d2',1.5);
+  line([[center-halfWidth,y],[center+halfWidth,y]],netColor,1.5);
  }
  rect(218,rimY-2,44,3,'#e78b42');rect(220,rimY+1,40,2,'#a94f28');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
