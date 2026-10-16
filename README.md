@@ -10,4 +10,4 @@
 
 [Website](https://www.sebastiantsang.com) · [LinkedIn](https://www.linkedin.com/in/sebtsang/) · [X](https://x.com/sebrtsang) · [Email](mailto:sebrtsang@gmail.com)
 
-<a href="https://sebtsang.github.io/sebtsang/?v=9"><img src="docs/court-preview-small.gif" width="640" alt="Play Half Court - flick to shoot a pixel basketball." /></a>
+<a href="https://sebtsang.github.io/sebtsang/?v=11"><img src="docs/court-preview-small.gif" width="640" alt="Play Half Court - hold and release to shoot a pixel basketball." /></a>

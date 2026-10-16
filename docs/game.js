@@ -1,28 +1,42 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
 const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=104;
-let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0;
+let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0,aimPhase=-Math.PI/2;
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
-function shoot(dx,dy,ms){
- if(phase!=='ready')return;if(dy<15){drag=null;return}
- const speed=dy/Math.max(ms,90)*1000;
- const power=Math.max(280,Math.min(590,310+dy*.85+speed*.045));
- ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-433;
- // Shot strength controls distance into the court, rather than giving every
- // upward flick the same landing spot. The visual arc stays readable.
- const arrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
- ball.depthV=(power/433)/arrival;
+const chargeSeconds=1.2;
+const shotArrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
+function sweepSpeed(){return Math.min(3.8,1.25+streak*.18)}
+function aimVelocity(){return Math.sin(aimPhase)*42/shotArrival}
+function chargeLevel(){return drag?Math.min(1,Math.max(0,(clock-drag.started)/chargeSeconds)):0}
+function beginCharge(id){
+ if(phase!=='ready'||drag)return;
+ drag={id,started:clock};message('Release to shoot.');
+}
+function releaseCharge(id){
+ if(!drag||drag.id!==id)return;
+ const level=chargeLevel(),vx=aimVelocity();
+ drag=null;shoot(vx,280+310*level);
+}
+function cancelCharge(){drag=null;if(phase==='ready')message('Hold to charge. Release to shoot.')}
+function shoot(vx,power){
+ if(phase!=='ready')return;
+ ball.vx=vx;ball.vy=-433;
+ ball.depthV=(Math.max(280,Math.min(590,power))/433)/shotArrival;
  phase='flight';shotStarted=clock;drag=null;message('…');
 }
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
-canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||Math.hypot(p.x-ball.x,p.y-ball.y)>42)return;drag={start:p,end:p,time:performance.now(),id:e.pointerId};canvas.setPointerCapture(e.pointerId);e.preventDefault()});
-canvas.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)drag.end=point(e)});
-canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const p=point(e);shoot(p.x-drag.start.x,drag.start.y-p.y,performance.now()-drag.time)});
-canvas.addEventListener('pointercancel',()=>{drag=null});canvas.addEventListener('lostpointercapture',()=>{drag=null});
+canvas.addEventListener('pointerdown',e=>{
+ const p=point(e);if(phase!=='ready'||drag||Math.hypot(p.x-ball.x,p.y-ball.y)>50)return;
+ canvas.focus({preventScroll:true});beginCharge(e.pointerId);canvas.setPointerCapture(e.pointerId);e.preventDefault();
+});
+canvas.addEventListener('pointerup',e=>releaseCharge(e.pointerId));
+canvas.addEventListener('pointercancel',cancelCharge);
+canvas.addEventListener('lostpointercapture',cancelCharge);
+window.addEventListener('blur',cancelCharge);
 let exiting=false;
 function exitGame(){if(exiting)return;exiting=true;window.location.assign('https://github.com/sebtsang')}
 function handleEscape(e){if(e.key==='Escape'||e.key==='Esc'||e.code==='Escape'){e.preventDefault();e.stopPropagation();exitGame()}}
@@ -31,9 +45,10 @@ window.addEventListener('keyup',handleEscape,true);
 // Focus the game on entry and on every pointer interaction so keyboard controls work immediately.
 if(!new URLSearchParams(location.search).has('capture'))canvas.focus({preventScroll:true});
 canvas.addEventListener('pointerdown',()=>canvas.focus({preventScroll:true}));
-canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();shoot(0,120,260)}});
+canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(!e.repeat)beginCharge('keyboard')}});
+window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();releaseCharge('keyboard')}},true);
 function tick(dt){
- clock+=dt;net=Math.max(0,net-dt*2);
+ clock+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt*2);
  if(phase==='flight'||phase==='result'){
   const oldY=ball.y,oldDepth=ball.depth;
   ball.vy+=gravity*dt;ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
@@ -85,7 +100,17 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
  rect(237,48,6,63,'#142827');rect(202,64,76,46,'#172d2c');rect(205,67,70,40,'#c7cfaf');rect(210,72,60,30,'#789a87');line([[228,104],[228,86],[252,86],[252,104]],'#e8e4bd',2);
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
- if(drag){const dx=drag.end.x-drag.start.x,dy=drag.end.y-drag.start.y;ctx.setLineDash([2,5]);line([[ball.x,ball.y],[ball.x+dx*.55,ball.y+Math.max(-135,dy*.55)]],'#e1cda7',2);ctx.setLineDash([])}
+ if(!captureMode&&phase==='ready'){
+  const endX=240+Math.sin(aimPhase)*42;
+  ctx.setLineDash([3,5]);line([[240,home.y-14],[endX,rimY]],'#f5dda0',1.5);ctx.setLineDash([]);
+  line([[endX-3,rimY+7],[endX,rimY+3],[endX+3,rimY+7]],'#f5dda0',1.5);
+  // Power fills upward. The narrow green band marks a clean shot's range.
+  const x=280,y=260,h=64,level=chargeLevel();
+  rect(x-2,y-2,14,h+4,'#172f28');rect(x,y,10,h,'#243f34');
+  rect(x,y+h-h*.55,10,h*.11,'#779c76');
+  if(drag)rect(x+2,y+h-h*level,6,Math.round(h*level),level>.65?'#e99a61':'#f5dda0');
+  line([[x-3,y+h-h*.4935],[x+13,y+h-h*.4935]],'#fff2cd');
+ }
  const rising=phase==='flight'&&ball.vy<0;
  if(!rising){
   // Keep the scored ball inside the net silhouette until it emerges below it.
@@ -108,14 +133,13 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  rect(218,rimY-2,44,3,'#e99a61');rect(220,rimY+1,40,2,'#a95435');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
- if(!captureMode&&phase==='ready'&&!drag){
+ if(!captureMode&&phase==='ready'){
   ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.lineWidth=3;
-  ctx.strokeStyle='#203e32';ctx.strokeText('FLICK TO SHOOT',240,263);
-  ctx.fillStyle='#fff2cd';ctx.fillText('FLICK TO SHOOT',240,263);
-  const bob=Math.round(Math.sin(clock*3)*2);
-  line([[235,274+bob],[240,269+bob],[245,274+bob]],'#fff2cd',2);
-  line([[240,270+bob],[240,280+bob]],'#fff2cd',2);
+  const label=drag?'RELEASE TO SHOOT':'HOLD TO CHARGE';
+  ctx.strokeStyle='#203e32';ctx.strokeText(label,240,246);
+  ctx.fillStyle='#fff2cd';ctx.fillText(label,240,246);
  }
+
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();
@@ -127,7 +151,7 @@ export function capturePreviewFrames(start,count){
  made=0;streak=0;best=0;clock=0;net=0;particles=[];reset();
  const images=[];let fired=false;
  for(let i=0;i<start+count;i++){
-  if(clock>=.45&&!fired){shoot(0,120,260);fired=true}
+  if(clock>=.45&&!fired){shoot(0,433);fired=true}
   for(let j=0;j<4;j++)tick(1/120);
   draw();
   if(i>=start)images.push(canvas.toDataURL('image/png').split(',')[1]);
