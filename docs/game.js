@@ -1,18 +1,19 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
-const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=105;
+const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=104;
 let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0;
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx*=.15;made++;streak++;best=Math.max(best,streak);try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx*=.15;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
 function shoot(dx,dy,ms){if(phase!=='ready')return;if(dy<15){drag=null;return}const speed=dy/Math.max(ms,90)*1000;ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-Math.max(365,Math.min(550,310+dy*.85+speed*.045));phase='flight';shotStarted=clock;drag=null;message('…')}
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||Math.hypot(p.x-ball.x,p.y-ball.y)>42)return;drag={start:p,end:p,time:performance.now(),id:e.pointerId};canvas.setPointerCapture(e.pointerId);e.preventDefault()});
 canvas.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)drag.end=point(e)});
 canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const p=point(e);shoot(p.x-drag.start.x,drag.start.y-p.y,performance.now()-drag.time)});
 canvas.addEventListener('pointercancel',()=>{drag=null});canvas.addEventListener('lostpointercapture',()=>{drag=null});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();window.location.assign('https://github.com/sebtsang')}});
 canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();shoot(0,120,260)}});
 function tick(dt){clock+=dt;net=Math.max(0,net-dt*2);if(phase==='flight'||phase==='result'){const oldY=ball.y;ball.vy+=gravity*dt;ball.x+=ball.vx*dt+ball.ax*dt*dt/2;ball.vx+=ball.ax*dt;ball.y+=ball.vy*dt;ball.rotation+=ball.vx*dt*.02;
  if(phase==='flight'){
@@ -37,16 +38,31 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.strokeStyle='#adbd94';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#adbd94',2);line([[411,107],[411,127]],'#adbd94',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
  rect(237,48,6,63,'#142827');rect(202,64,76,46,'#172d2c');rect(205,67,70,40,'#c7cfaf');rect(210,72,60,30,'#789a87');line([[228,104],[228,86],[252,86],[252,104]],'#e8e4bd',2);
- // Net flexes briefly after a basket.
- const sag=net*5*Math.sin(clock*28);for(let i=0;i<6;i++){const x=221+i*7.6;line([[x,106],[232+i*3.3+sag,131]],'#cbd2ad')}line([[222,115],[258,115]],'#a7baa0');line([[227,124],[253,124]],'#a7baa0');
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(drag){const dx=drag.end.x-drag.start.x,dy=drag.end.y-drag.start.y;ctx.setLineDash([2,5]);line([[ball.x,ball.y],[ball.x+dx*.55,ball.y+Math.max(-135,dy*.55)]],'#e1cda7',2);ctx.setLineDash([])}
  const rising=phase==='flight'&&ball.vy<0;
  if(!rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
- rect(218,103,44,3,'#e99a61');rect(220,106,40,2,'#a95435');
+ // Net flexes briefly after a basket.
+ const sag=net*5*Math.sin(clock*28);for(let i=0;i<6;i++){const x=221+i*7.6;line([[x,rimY+2],[232+i*3.3+sag,rimY+27]],'#cbd2ad')}line([[222,rimY+11],[258,rimY+11]],'#a7baa0');line([[227,rimY+20],[253,rimY+20]],'#a7baa0');
+ rect(218,rimY-2,44,3,'#e99a61');rect(220,rimY+1,40,2,'#a95435');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(phase==='ready'&&!drag){ctx.fillStyle='#c8d3b1';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('FLICK TO SHOOT',240,270);const bob=Math.round(Math.sin(clock*3)*2);line([[238,277+bob],[240,275+bob],[242,277+bob]],'#c8d3b1')}
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
-scores();reset();requestAnimationFrame(frame);
+scores();reset();
+const captureMode=new URLSearchParams(location.search).has('capture');
+if(!captureMode)requestAnimationFrame(frame);
+// Render the README preview with this exact simulation and artwork.
+export function capturePreviewFrames(start,count){
+ const random=Math.random;let seed=42;Math.random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ made=0;streak=0;best=0;clock=0;net=0;particles=[];reset();
+ const images=[];let fired=false;
+ for(let i=0;i<start+count;i++){
+  if(clock>=.45&&!fired){shoot(0,120,260);fired=true}
+  for(let j=0;j<4;j++)tick(1/120);
+  draw();
+  if(i>=start)images.push(canvas.toDataURL('image/png').split(',')[1]);
+ }
+ Math.random=random;return images;
+}
