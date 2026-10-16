@@ -147,8 +147,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
 }
 function drawPrompt(label,size=10){
  ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.lineWidth=3;
- ctx.strokeStyle='#203e32';ctx.strokeText(label,240,246);
- ctx.fillStyle='#fff2cd';ctx.fillText(label,240,246);
+ ctx.strokeStyle='#203e32';ctx.strokeText(label,240,258);
+ ctx.fillStyle='#fff2cd';ctx.fillText(label,240,258);
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();
