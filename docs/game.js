@@ -108,7 +108,14 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  rect(218,rimY-2,44,3,'#e99a61');rect(220,rimY+1,40,2,'#a95435');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
- if(!captureMode&&phase==='ready'&&!drag){ctx.fillStyle='#c8d3b1';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('FLICK TO SHOOT',240,270);const bob=Math.round(Math.sin(clock*3)*2);line([[238,277+bob],[240,275+bob],[242,277+bob]],'#c8d3b1')}
+ if(!captureMode&&phase==='ready'&&!drag){
+  ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.lineWidth=3;
+  ctx.strokeStyle='#203e32';ctx.strokeText('FLICK TO SHOOT',240,263);
+  ctx.fillStyle='#fff2cd';ctx.fillText('FLICK TO SHOOT',240,263);
+  const bob=Math.round(Math.sin(clock*3)*2);
+  line([[235,274+bob],[240,269+bob],[245,274+bob]],'#fff2cd',2);
+  line([[240,270+bob],[240,280+bob]],'#fff2cd',2);
+ }
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();
