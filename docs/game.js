@@ -95,19 +95,19 @@ function tick(dt){
 }
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function line(points,c,width=1){ctx.strokeStyle=c;ctx.lineWidth=width;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}
-function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#ef9b50';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
-function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1c302f');
+function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#d98b52';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#17191d');
  // Fence, trees and warm lamps: all art is drawn locally.
- for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#344b43');line([[x,37],[x+32,69],[x,91]],'#2b423b')}line([[0,36],[480,36]],'#4a5d4b',2);
- for(const x of [32,448]){rect(x,15,3,76,'#71816a');rect(x-7,14,17,4,'#eed4a0');rect(x-4,18,11,2,'#ad9567')}
- rect(16,94,448,250,'#416555');rect(26,103,428,232,'#345848');
- for(let y=107;y<335;y+=7)for(let x=29+(y%3);x<452;x+=13)rect(x,y,1,1,'#3b5e4d');
- line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#adbd94',2);
- rect(188,107,104,99,'#52745c');line([[188,107],[188,206],[292,206],[292,107]],'#adbd94',2);
- ctx.strokeStyle='#adbd94';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#adbd94',2);line([[411,107],[411,127]],'#adbd94',2);
+ for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#34373b');line([[x,37],[x+32,69],[x,91]],'#292c30')}line([[0,36],[480,36]],'#494d52',2);
+ for(const x of [32,448]){rect(x,15,3,76,'#777c83');rect(x-7,14,17,4,'#e5e5df');rect(x-4,18,11,2,'#969a9e')}
+ rect(16,94,448,250,'#45494e');rect(26,103,428,232,'#292c30');
+ for(let y=107;y<335;y+=7)for(let x=29+(y%3);x<452;x+=13)rect(x,y,1,1,'#303338');
+ line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#d8d8d2',2);
+ rect(188,107,104,99,'#363a40');line([[188,107],[188,206],[292,206],[292,107]],'#d8d8d2',2);
+ ctx.strokeStyle='#d8d8d2';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#d8d8d2',2);line([[411,107],[411,127]],'#d8d8d2',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
- rect(237,48,6,63,'#142827');rect(202,64,76,46,'#172d2c');rect(205,67,70,40,'#c7cfaf');rect(210,72,60,30,'#789a87');line([[228,104],[228,86],[252,86],[252,104]],'#e8e4bd',2);
- ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
+ rect(237,48,6,63,'#111317');rect(202,64,76,46,'#1a1c20');rect(205,67,70,40,'#d8d8d2');rect(210,72,60,30,'#73787f');line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);
+ ctx.fillStyle='#08090b66';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
   const angle=Math.atan2(Math.sin(aimPhase)*aimWidth,home.y-rimY);
@@ -117,7 +117,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
   const endX=ball.x+Math.sin(angle)*length;
   const endY=ball.y-Math.cos(angle)*length;
   ctx.setLineDash([3,5]);
-  line([[ball.x,ball.y],[endX,endY]],'#f5dda0',1.5);
+  line([[ball.x,ball.y],[endX,endY]],'#f1f0ea',1.5);
   ctx.setLineDash([]);
  }
  const rising=phase==='flight'&&ball.vy<0;
@@ -133,13 +133,13 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  const sag=net*3*Math.sin(clock*28);
  for(let i=0;i<7;i++){
   const x=220+i*40/6,bottom=230+i*20/6+sag;
-  line([[x,rimY+2],[bottom,rimY+27]],'#e0e5c6',1.5);
+  line([[x,rimY+2],[bottom,rimY+27]],'#e3e3dd',1.5);
  }
  for(let row=1;row<=4;row++){
   const y=rimY+2+row*6,t=row*6/25;
-  line([[220+10*t,y],[260-10*t,y]],'#d4ddbc',1.5);
+  line([[220+10*t,y],[260-10*t,y]],'#d8d8d2',1.5);
  }
- rect(218,rimY-2,44,3,'#e99a61');rect(220,rimY+1,40,2,'#a95435');
+ rect(218,rimY-2,44,3,'#c5c7ca');rect(220,rimY+1,40,2,'#7b8087');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(!captureMode&&phase==='ready')drawPrompt(drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER');
@@ -147,8 +147,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
 }
 function drawPrompt(label,size=10){
  ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.lineWidth=3;
- ctx.strokeStyle='#203e32';ctx.strokeText(label,240,255);
- ctx.fillStyle='#fff2cd';ctx.fillText(label,240,255);
+ ctx.strokeStyle='#202226';ctx.strokeText(label,240,255);
+ ctx.fillStyle='#f1f0ea';ctx.fillText(label,240,255);
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();
