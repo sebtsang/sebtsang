@@ -4,10 +4,20 @@ const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=104;
 let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0;
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
-function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0};phase='ready';drag=null}
+function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
-function shoot(dx,dy,ms){if(phase!=='ready')return;if(dy<15){drag=null;return}const speed=dy/Math.max(ms,90)*1000;ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-Math.max(365,Math.min(550,310+dy*.85+speed*.045));phase='flight';shotStarted=clock;drag=null;message('…')}
+function shoot(dx,dy,ms){
+ if(phase!=='ready')return;if(dy<15){drag=null;return}
+ const speed=dy/Math.max(ms,90)*1000;
+ const power=Math.max(280,Math.min(590,310+dy*.85+speed*.045));
+ ball.vx=Math.max(-170,Math.min(170,dx*1.05));ball.vy=-433;
+ // Shot strength controls distance into the court, rather than giving every
+ // upward flick the same landing spot. The visual arc stays readable.
+ const arrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
+ ball.depthV=(power/433)/arrival;
+ phase='flight';shotStarted=clock;drag=null;message('…');
+}
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||Math.hypot(p.x-ball.x,p.y-ball.y)>42)return;drag={start:p,end:p,time:performance.now(),id:e.pointerId};canvas.setPointerCapture(e.pointerId);e.preventDefault()});
 canvas.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)drag.end=point(e)});
@@ -22,15 +32,44 @@ window.addEventListener('keyup',handleEscape,true);
 if(!new URLSearchParams(location.search).has('capture'))canvas.focus({preventScroll:true});
 canvas.addEventListener('pointerdown',()=>canvas.focus({preventScroll:true}));
 canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();shoot(0,120,260)}});
-function tick(dt){clock+=dt;net=Math.max(0,net-dt*2);if(phase==='flight'||phase==='result'){const oldY=ball.y;ball.vy+=gravity*dt;ball.x+=ball.vx*dt+ball.ax*dt*dt/2;ball.vx+=ball.ax*dt;ball.y+=ball.vy*dt;ball.rotation+=ball.vx*dt*.02;
- if(phase==='flight'){
- // Rising shots are in front of the hoop; descending shots enter behind the front rim.
- // Score only when the entire ball fits through the hoop, travelling down.
- if(ball.vy>0&&oldY<rimY&&ball.y>=rimY&&Math.abs(ball.x-240)<10){ball.scored=true;finish(true)}
- else{for(const x of [220,260]){const dx=ball.x-x,dy=ball.y-rimY,d=Math.hypot(dx,dy);if(d<ball.r+2&&d>0){const nx=dx/d,ny=dy/d,dot=ball.vx*nx+ball.vy*ny;if(dot<0){ball.vx-=1.6*dot*nx;ball.vy-=1.6*dot*ny;ball.x=x+nx*(ball.r+2);ball.y=rimY+ny*(ball.r+2)}}}
- if(ball.y>H+20||ball.x<-30||ball.x>W+30||clock-shotStarted>5)finish(false)}
- }if(phase==='result'&&clock>=resetAt)reset();}
- particles=particles.filter(p=>p.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.life-=dt}}
+function tick(dt){
+ clock+=dt;net=Math.max(0,net-dt*2);
+ if(phase==='flight'||phase==='result'){
+  const oldY=ball.y,oldDepth=ball.depth;
+  ball.vy+=gravity*dt;ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
+  ball.depth+=ball.depthV*dt;ball.rotation+=ball.vx*dt*.02;
+  if(phase==='flight'){
+   // The backboard is behind the hoop. An overpowered shot reaches it
+   // while still airborne and rebounds toward the shooter.
+   if(ball.depthV>0&&oldDepth<1.08&&ball.depth>=1.08&&ball.x>202-ball.r&&ball.x<278+ball.r&&ball.y+ball.r>=64&&ball.y-ball.r<=110){
+    ball.depth=1.08;ball.depthV*=-1.1;ball.vy=Math.abs(ball.vy)*.75+55;ball.vx*=.85;ball.boardHits++;message('Off the glass.');
+   }
+   const atHoop=ball.depth>=.90&&ball.depth<=1.10;
+   let collided=false;
+   if(atHoop&&ball.vy>0){
+    for(const x of [220,260]){
+     const dx=ball.x-x,dy=ball.y-rimY,d=Math.hypot(dx,dy),contact=ball.r+3;
+     if(d<contact&&d>0){
+      const nx=dx/d,ny=dy/d,dot=ball.vx*nx+ball.vy*ny;
+      if(dot<0){
+       ball.vx-=1.82*dot*nx;ball.vy-=1.82*dot*ny;
+       ball.x=x+nx*contact;ball.y=rimY+ny*contact;
+       ball.depth=1;ball.depthV=0;ball.rimHits++;collided=true;message('On the rim…');
+      }
+     }
+    }
+   }
+   // A clean make needs both the correct distance and centered entry.
+   if(!collided&&ball.vy>0&&oldY<rimY&&ball.y>=rimY&&Math.abs(ball.x-240)<=7&&Math.abs(ball.depth-1)<=.055){
+    ball.scored=true;finish(true);
+   }
+   if(ball.y>H+20||ball.x<-30||ball.x>W+30||clock-shotStarted>5)finish(false);
+  }
+  if(phase==='result'&&clock>=resetAt)reset();
+ }
+ particles=particles.filter(p=>p.life>0);
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.life-=dt}
+}
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function line(points,c,width=1){ctx.strokeStyle=c;ctx.lineWidth=width;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}
 function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#ef9b50';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
