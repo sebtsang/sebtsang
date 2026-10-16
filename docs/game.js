@@ -109,8 +109,10 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
-  const length=powerLevel()*fullPowerDrag;
   const angle=Math.atan2(Math.sin(aimPhase)*42,home.y-rimY);
+  const netBottom=rimY+27;
+  const maxLength=(ball.y-netBottom-10)/Math.cos(angle);
+  const length=powerLevel()*Math.min(fullPowerDrag,maxLength);
   const endX=ball.x+Math.sin(angle)*length;
   const endY=ball.y-Math.cos(angle)*length;
   ctx.setLineDash([3,5]);
