@@ -7,21 +7,22 @@ function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
-const chargeSeconds=1.2;
+const fullPowerDrag=200;
 const shotArrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
 function sweepSpeed(){return Math.min(3.8,1.25+streak*.18)}
 function aimVelocity(){return Math.sin(aimPhase)*42/shotArrival}
-function chargeLevel(){return drag?Math.min(1,Math.max(0,(clock-drag.started)/chargeSeconds)):0}
-function beginCharge(id){
+function powerLevel(){return drag?Math.min(1,Math.max(0,(drag.startY-drag.endY)/fullPowerDrag)):0}
+function beginDrag(id,y){
  if(phase!=='ready'||drag)return;
- drag={id,started:clock};message('Release to shoot.');
+ drag={id,startY:y,endY:y};message('Drag up for power. Release to shoot.');
 }
-function releaseCharge(id){
+function updateDrag(id,y){if(drag&&drag.id===id)drag.endY=y}
+function releaseDrag(id){
  if(!drag||drag.id!==id)return;
- const level=chargeLevel(),vx=aimVelocity();
- drag=null;shoot(vx,280+310*level);
+ const level=powerLevel(),vx=aimVelocity();
+ drag=null;if(level<.03){cancelDrag();return}shoot(vx,280+310*level);
 }
-function cancelCharge(){drag=null;if(phase==='ready')message('Hold to charge. Release to shoot.')}
+function cancelDrag(){drag=null;if(phase==='ready')message('Drag up for power. Release to shoot.')}
 function shoot(vx,power){
  if(phase!=='ready')return;
  ball.vx=vx;ball.vy=-433;
@@ -31,12 +32,13 @@ function shoot(vx,power){
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 canvas.addEventListener('pointerdown',e=>{
  const p=point(e);if(phase!=='ready'||drag||Math.hypot(p.x-ball.x,p.y-ball.y)>50)return;
- canvas.focus({preventScroll:true});beginCharge(e.pointerId);canvas.setPointerCapture(e.pointerId);e.preventDefault();
+ canvas.focus({preventScroll:true});beginDrag(e.pointerId,p.y);canvas.setPointerCapture(e.pointerId);e.preventDefault();
 });
-canvas.addEventListener('pointerup',e=>releaseCharge(e.pointerId));
-canvas.addEventListener('pointercancel',cancelCharge);
-canvas.addEventListener('lostpointercapture',cancelCharge);
-window.addEventListener('blur',cancelCharge);
+canvas.addEventListener('pointermove',e=>updateDrag(e.pointerId,point(e).y));
+canvas.addEventListener('pointerup',e=>{updateDrag(e.pointerId,point(e).y);releaseDrag(e.pointerId)});
+canvas.addEventListener('pointercancel',cancelDrag);
+canvas.addEventListener('lostpointercapture',cancelDrag);
+window.addEventListener('blur',cancelDrag);
 let exiting=false;
 function exitGame(){if(exiting)return;exiting=true;window.location.assign('https://github.com/sebtsang')}
 function handleEscape(e){if(e.key==='Escape'||e.key==='Esc'||e.code==='Escape'){e.preventDefault();e.stopPropagation();exitGame()}}
@@ -45,8 +47,13 @@ window.addEventListener('keyup',handleEscape,true);
 // Focus the game on entry and on every pointer interaction so keyboard controls work immediately.
 if(!new URLSearchParams(location.search).has('capture'))canvas.focus({preventScroll:true});
 canvas.addEventListener('pointerdown',()=>canvas.focus({preventScroll:true}));
-canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(!e.repeat)beginCharge('keyboard')}});
-window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();releaseCharge('keyboard')}},true);
+canvas.addEventListener('keydown',e=>{
+ if(e.code==='Space'){e.preventDefault();if(!e.repeat)beginDrag('keyboard',home.y)}
+ if(drag?.id==='keyboard'&&(e.code==='ArrowUp'||e.code==='ArrowDown')){
+  e.preventDefault();updateDrag('keyboard',Math.max(home.y-fullPowerDrag,Math.min(home.y,drag.endY+(e.code==='ArrowUp'?-10:10))));
+ }
+});
+window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();releaseDrag('keyboard')}},true);
 function tick(dt){
  clock+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt*2);
  if(phase==='flight'||phase==='result'){
@@ -103,9 +110,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  if(!captureMode&&phase==='ready'){
   const endX=240+Math.sin(aimPhase)*42;
   ctx.setLineDash([3,5]);line([[240,home.y-14],[endX,rimY]],'#f5dda0',1.5);ctx.setLineDash([]);
-  line([[endX-3,rimY+7],[endX,rimY+3],[endX+3,rimY+7]],'#f5dda0',1.5);
   // Power fills upward. The narrow green band marks a clean shot's range.
-  const x=280,y=260,h=64,level=chargeLevel();
+  const x=280,y=260,h=64,level=powerLevel();
   rect(x-2,y-2,14,h+4,'#172f28');rect(x,y,10,h,'#243f34');
   rect(x,y+h-h*.55,10,h*.11,'#779c76');
   if(drag)rect(x+2,y+h-h*level,6,Math.round(h*level),level>.65?'#e99a61':'#f5dda0');
@@ -135,7 +141,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(!captureMode&&phase==='ready'){
   ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.lineWidth=3;
-  const label=drag?'RELEASE TO SHOOT':'HOLD TO CHARGE';
+  const label=drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER';
   ctx.strokeStyle='#203e32';ctx.strokeText(label,240,246);
   ctx.fillStyle='#fff2cd';ctx.fillText(label,240,246);
  }
