@@ -107,15 +107,15 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
  rect(237,48,6,63,'#142827');rect(202,64,76,46,'#172d2c');rect(205,67,70,40,'#c7cfaf');rect(210,72,60,30,'#789a87');line([[228,104],[228,86],[252,86],[252,104]],'#e8e4bd',2);
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
- if(!captureMode&&phase==='ready'){
-  const endX=240+Math.sin(aimPhase)*42;
-  ctx.setLineDash([3,5]);line([[240,home.y-14],[endX,rimY]],'#f5dda0',1.5);ctx.setLineDash([]);
-  // Power fills upward. The narrow green band marks a clean shot's range.
-  const x=280,y=260,h=64,level=powerLevel();
-  rect(x-2,y-2,14,h+4,'#172f28');rect(x,y,10,h,'#243f34');
-  rect(x,y+h-h*.55,10,h*.11,'#779c76');
-  if(drag)rect(x+2,y+h-h*level,6,Math.round(h*level),level>.65?'#e99a61':'#f5dda0');
-  line([[x-3,y+h-h*.4935],[x+13,y+h-h*.4935]],'#fff2cd');
+ if(!captureMode&&phase==='ready'&&drag){
+  // The drag sets the line length; the sweep alone sets its direction.
+  const length=powerLevel()*fullPowerDrag;
+  const angle=Math.atan2(Math.sin(aimPhase)*42,home.y-rimY);
+  const endX=ball.x+Math.sin(angle)*length;
+  const endY=ball.y-Math.cos(angle)*length;
+  ctx.setLineDash([3,5]);
+  line([[ball.x,ball.y],[endX,endY]],'#f5dda0',1.5);
+  ctx.setLineDash([]);
  }
  const rising=phase==='flight'&&ball.vy<0;
  if(!rising){
