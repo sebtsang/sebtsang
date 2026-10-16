@@ -6,7 +6,14 @@ try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0};phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
+function highlightScores(){
+ if(captureMode||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+ for(const key of ['made','streak'])ui[key].animate?.([
+  {color:'#ffffff',textShadow:'0 0 12px rgba(255,235,196,.55)'},
+  {color:'#f1f0ea',textShadow:'0 0 0 rgba(255,235,196,0)'}
+ ],{duration:500,easing:'ease-out'});
+}
 const fullPowerDrag=200;
 const aimWidth=58;
 const shotArrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
@@ -56,7 +63,7 @@ canvas.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();releaseDrag('keyboard')}},true);
 function tick(dt){
- clock+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt*2);
+ clock+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt/1.1);
  if(phase==='flight'||phase==='result'){
   const oldY=ball.y,oldDepth=ball.depth;
   ball.vy+=gravity*dt;ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
@@ -95,6 +102,11 @@ function tick(dt){
 }
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function line(points,c,width=1){ctx.strokeStyle=c;ctx.lineWidth=width;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}
+function netShape(){
+ const age=(1-net)*1.1;
+ const spring=net>0?Math.exp(-4.5*age)*Math.sin(14*age):0;
+ return {bottomY:rimY+27+16*spring,halfWidth:10+3*spring,sway:net>0?1.5*Math.exp(-5*age)*Math.sin(19*age):0};
+}
 function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#d98b52';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
 function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#17191d');
  // Fence, trees and warm lamps: all art is drawn locally.
@@ -112,7 +124,16 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   }
  }
  line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#25272b',2);
- rect(188,107,104,99,'#292c30');line([[188,107],[188,206],[292,206],[292,107]],'#f1f0ea',2);
+ rect(188,107,104,99,'#292c30');
+ // A static pool of warm light keeps the floor dimensional without flicker.
+ ctx.save();ctx.beginPath();ctx.rect(26,103,428,232);ctx.clip();
+ ctx.translate(240,145);ctx.scale(1.65,1);
+ const light=ctx.createRadialGradient(0,0,8,0,0,155);
+ light.addColorStop(0,'rgba(255,239,205,.13)');
+ light.addColorStop(.55,'rgba(255,239,205,.055)');
+ light.addColorStop(1,'rgba(255,239,205,0)');
+ ctx.fillStyle=light;ctx.fillRect(-155,-155,310,310);ctx.restore();
+ line([[188,107],[188,206],[292,206],[292,107]],'#f1f0ea',2);
  ctx.strokeStyle='#25272b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#25272b',2);line([[411,107],[411,127]],'#25272b',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
  rect(237,48,6,63,'#111317');
@@ -135,24 +156,26 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   line([[ball.x,ball.y],[endX,endY]],'#f1f0ea',1.5);
   ctx.setLineDash([]);
  }
+ const mesh=netShape();
  const rising=phase==='flight'&&ball.vy<0;
  if(!rising){
   // Keep the scored ball inside the net silhouette until it emerges below it.
   ctx.save();
-  if(ball.scored&&ball.y-ball.r<rimY+27){
-   ctx.beginPath();ctx.moveTo(220,0);ctx.lineTo(260,0);ctx.lineTo(260,rimY+2);ctx.lineTo(250,rimY+27);ctx.lineTo(W,rimY+27);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.lineTo(0,rimY+27);ctx.lineTo(230,rimY+27);ctx.lineTo(220,rimY+2);ctx.closePath();ctx.clip();
+  if(ball.scored&&ball.y-ball.r<mesh.bottomY){
+   ctx.beginPath();ctx.moveTo(220,0);ctx.lineTo(260,0);ctx.lineTo(260,rimY+2);ctx.lineTo(240+mesh.halfWidth+mesh.sway,mesh.bottomY);ctx.lineTo(W,mesh.bottomY);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.lineTo(0,mesh.bottomY);ctx.lineTo(240-mesh.halfWidth+mesh.sway,mesh.bottomY);ctx.lineTo(220,rimY+2);ctx.closePath();ctx.clip();
   }
   drawBall(ball.x,ball.y,ball.r,ball.rotation);ctx.restore();
  }
- // Net flexes briefly after a basket.
- const sag=net*3*Math.sin(clock*28);
+ // The top stays fixed to the rim while the woven net stretches and settles.
  for(let i=0;i<7;i++){
-  const x=220+i*40/6,bottom=230+i*20/6+sag;
-  line([[x,rimY+2],[bottom,rimY+27]],'#e3e3dd',1.5);
+  const topX=220+i*40/6;
+  const bottomX=240-mesh.halfWidth+mesh.sway+i*mesh.halfWidth*2/6;
+  line([[topX,rimY+2],[bottomX,mesh.bottomY]],'#e3e3dd',1.5);
  }
  for(let row=1;row<=4;row++){
-  const y=rimY+2+row*6,t=row*6/25;
-  line([[220+10*t,y],[260-10*t,y]],'#d8d8d2',1.5);
+  const t=row/4,y=rimY+2+(mesh.bottomY-rimY-2)*t;
+  const halfWidth=20+(mesh.halfWidth-20)*t,center=240+mesh.sway*t;
+  line([[center-halfWidth,y],[center+halfWidth,y]],'#d8d8d2',1.5);
  }
  rect(218,rimY-2,44,3,'#e78b42');rect(220,rimY+1,40,2,'#a94f28');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);

@@ -1,7 +1,8 @@
 const vm = require('node:vm');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
-const nodes = Object.fromEntries(['made', 'streak', 'best', 'status'].map(id => [id, {textContent: ''}]));
+const animationLog=[];
+const nodes = Object.fromEntries(['made', 'streak', 'best', 'status'].map(id => [id, {textContent: '',animate:(frames,options)=>animationLog.push({id,frames,options})}]));
 const storage = {};
 const context = {
  document: {querySelector: () => ({getContext: () => ({}), focus() {}, addEventListener() {}}), getElementById: id => nodes[id]},
@@ -11,7 +12,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('docs/game.js', 'utf8').replace('export function', 'function') + `
-globalThis.game = {shoot, tick, reset, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
+globalThis.game = {shoot, tick, reset, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
 const game = context.game;
 function shot(vx, power) {
  game.reset(); game.shoot(vx, power);
@@ -23,6 +24,13 @@ function shot(vx, power) {
 }
 let result = shot(0, 433);
 assert.equal(result.ball.scored, true, 'Centered, correctly powered shot scores');
+assert.deepEqual(animationLog.map(a=>a.id),['made','streak'],'Only score counters highlight on a make');
+assert.ok(animationLog.every(a=>a.options.duration<=600),'Highlights are brief');
+const restingNet=game.netShape().bottomY;
+for(let i=0;i<15;i++)game.tick(1/120);
+assert.ok(game.netShape().bottomY>restingNet+4,'Net stretches downward after a make');
+for(let i=0;i<150;i++)game.tick(1/120);
+assert.equal(game.netShape().bottomY,restingNet,'Net settles back to its resting geometry');
 result = shot(0, 433);
 assert.equal(result.streak, 2);
 assert.equal(storage['half-court-best'], '2');
