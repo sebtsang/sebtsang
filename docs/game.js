@@ -8,9 +8,10 @@ function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores()}
 const fullPowerDrag=200;
+const aimWidth=58;
 const shotArrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
 function sweepSpeed(){return Math.min(3.8,1.25+streak*.18)}
-function aimVelocity(){return Math.sin(aimPhase)*42/shotArrival}
+function aimVelocity(){return Math.sin(aimPhase)*aimWidth/shotArrival}
 function powerLevel(){return drag?Math.min(1,Math.max(0,(drag.startY-drag.endY)/fullPowerDrag)):0}
 function beginDrag(id,y){
  if(phase!=='ready'||drag)return;
@@ -109,7 +110,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  ctx.fillStyle='#10272566';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
-  const angle=Math.atan2(Math.sin(aimPhase)*42,home.y-rimY);
+  const angle=Math.atan2(Math.sin(aimPhase)*aimWidth,home.y-rimY);
   const netBottom=rimY+27;
   const maxLength=(ball.y-netBottom-10)/Math.cos(angle);
   const length=powerLevel()*Math.min(fullPowerDrag,maxLength);
