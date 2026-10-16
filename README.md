@@ -2,7 +2,7 @@
 
 # Sebastian Tsang
 
-[![typing](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&pause=1200&color=0A66C2&center=true&vCenter=true&width=560&lines=AI+%26+Data+Consultant+%40+EY;Building+AI+that+automates+people's+lives;CS+%40+Guelph%2C+based+in+Toronto)](https://www.sebastiantsang.com)
+[![typing](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&pause=1200&color=0A66C2&center=true&vCenter=true&width=560&lines=AI+Engineer+%40+FriedmannAI;Building+AI+that+automates+people's+lives;CS+%40+Guelph%2C+based+in+Toronto)](https://www.sebastiantsang.com)
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-sebastiantsang.com-0A66C2?style=flat-square&logo=vercel&logoColor=white)](https://www.sebastiantsang.com)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/sebtsang)
@@ -13,12 +13,14 @@
 
 ```yaml
 sebtsang:
-  now: AI & Data Consultant @ EY (Summer '26)
+  now: AI Engineer @ FriedmannAI
   based_in: Toronto
   building: AI that automates people's lives
 ```
 
-AI & Data Consultant @ EY · CS @ University of Guelph · Prev. @ Interac, BMO
+AI Engineer @ FriedmannAI · CS @ University of Guelph · Toronto
+
+I'm Seb. I build systems that make tedious work quick, easy, or invisible. Right now, I'm building AI agent infrastructure, LLM evals, and privacy middleware for financial planning at FriedmannAI while finishing my last semester at Guelph.
 
 ---
 
@@ -26,36 +28,16 @@ AI & Data Consultant @ EY · CS @ University of Guelph · Prev. @ Interac, BMO
 
 | Role | Company | Focus | Dates |
 | --- | --- | --- | --- |
-| **AI & Data Consultant** | **EY** | **Consulting on enterprise-scale AI & Data delivery in financial services.** | **May 2026 — Sep 2026** |
-| AI Engineering Fellow | Polarity | Frontier AI QA research (Afore Capital fellowship) | Apr 2026 — May 2026 |
-| Data & AI Developer | BMO Financial Group | Airflow DAG automation | Jan 2026 — Apr 2026 |
-| Growth Fellow | [Stan](https://stan.store) | Scaling [Stanley](https://stanley.stan.store/) to $10M ARR | Mar 2026 — Apr 2026 |
-| Data Engineer | Interac Corp. | PL/SQL pipelines, CI/CD | May 2025 — Aug 2025 |
-| Data Analyst, IT Ops | Interac Corp. | Reporting automation, Tableau | Sep 2024 — Apr 2025 |
-| Data Engineer | Spirit of Math | Medallion lakehouse in Fabric | May 2024 — Aug 2024 |
-| Technical Analyst | Spirit of Math | API-based access automation | May 2023 — Aug 2023 |
+| **AI Engineer** | **FriedmannAI** | **AI agent infrastructure, LLM evals, and privacy middleware for financial planning** | **Sep 2026 — Present** |
+| AI & Data Consultant Intern | EY | Enterprise AI & data delivery in financial services | May 2026 — Aug 2026 |
+| Data & AI Developer Intern | BMO Financial Group | Automated Airflow DAG generation from ingestion specs | Jan 2026 — Apr 2026 |
+| Growth | [Stan](https://stan.store) | Wrote content reaching 500k+ impressions | Mar 2026 — Apr 2026 |
+| Data Engineering Intern | Interac | Oracle PL/SQL pipelines, code quality checks in GitHub Actions, Jira automation | May 2025 — Aug 2025 |
+| Data Analyst Intern, IT Operations | Interac | Reporting automation with Tableau, Power Automate, and Splunk | Sep 2024 — Apr 2025 |
+| Data Engineering Intern | Spirit of Math | ETL pipelines and a Medallion lakehouse in Microsoft Fabric | May 2024 — Aug 2024 |
+| Technical Analyst Intern | Spirit of Math | API-based access automation | May 2023 — Aug 2023 |
 
-### 🛠️ Projects
-
-**[Personal Portfolio](https://github.com/sebtsang/personal-portfolio)** &nbsp;·&nbsp; [🌐 sebastiantsang.com](https://www.sebastiantsang.com)
-My personal site, rendered as a spiral-bound journal — the chat *is* the home page, and every section flips open like a page. LLM-streamed answers, slash commands, and page-flip physics.
-`Next.js 15` `React 19` `TypeScript` `Tailwind` `Framer Motion` `Vercel AI SDK`
-
-**[GMaestro](https://github.com/sebtsang/gmaestro)** &nbsp;·&nbsp; *SOON Hackathon '26*
-A local-first AI GTM team for founder-led startups. One Conductor plans, three department heads delegate, ten specialist agents research and draft in your voice — then execute over Composio, but only after you approve.
-`TypeScript` `Multi-Agent` `Composio` `Claude` `Next.js`
-
-**[LabLens](https://github.com/sebtsang/lablens)** &nbsp;·&nbsp; *Agents Assemble Healthcare AI Hackathon '26*
-A medication-aware lab-triage agent that turns an abnormal lab result into a risk-stratified, drug-interaction-checked action packet for clinician review. Deterministic thresholds meet LLM pharmacology reasoning over FHIR.
-`Python` `MCP` `FastAPI` `FHIR` `Pydantic`
-
-**[Idea OS](https://github.com/openclaw/openclaw)** &nbsp;·&nbsp; *capture-to-draft pipeline*
-Ideas in from Discord/Telegram, structured research out, LinkedIn-ready drafts — built on OpenClaw.
-`Python` `Claude` `OpenClaw`
-
-**[Mathify](https://github.com/sebtsang/mathify)** &nbsp;·&nbsp; *Google × GitCloud Mini-Hackathon '26 · built in one night*
-A satirical Chrome extension that inflates only the private LinkedIn metrics no one else can verify. MV3 content script, a `MutationObserver`, and Gemini picking the multiplier — an exercise in restraint disguised as a joke.
-`JavaScript` `Chrome MV3` `Gemini`
+Eight internship terms across five companies. My Interac analyst placement covered two consecutive co-op terms; Stan was a separate growth role.
 
 ### 🧰 Toolbox
 
@@ -84,11 +66,11 @@ A satirical Chrome extension that inflates only the private LinkedIn metrics no 
 
 ### 🎓 Education
 
-**B.Comp. Computer Science** @ University of Guelph · Dean's Honour List · Expected Apr 2027
+**Computer Science** @ University of Guelph · Final semester, with all program courses completed by December 2026
 
 ### ✨ Beyond code
 
-President of UofG Toastmasters for a year. Interac's first-ever Intern of the Quarter. Judged UofTHacks 13 (600+ participants). I like building with AI that automates people's lives.
+Led UofG Toastmasters as president (May 2024 — Apr 2025) and judged UofTHacks 13 (600+ participants). I play basketball, build with AI, and am always up for a good chat. LinkedIn DM is the easiest way to reach me.
 
 ---
 
