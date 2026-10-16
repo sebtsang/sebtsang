@@ -110,7 +110,7 @@ function netShape(){
 function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#d98b52';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
 function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#17191d');
  // Fence, trees and warm lamps: all art is drawn locally.
- for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#34373b');line([[x,37],[x+32,69],[x,91]],'#292c30')}line([[0,36],[480,36]],'#494d52',2);
+ for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#50555d');line([[x,37],[x+32,69],[x,91]],'#444951')}line([[0,36],[480,36]],'#686e77',2);
  for(const x of [32,448]){rect(x,15,3,76,'#777c83');rect(x-7,14,17,4,'#e5e5df');rect(x-4,18,11,2,'#969a9e')}
  rect(16,94,448,250,'#15171a');rect(26,103,428,232,'#c7a16d');
  // Staggered maple planks, with restrained grain and seams.

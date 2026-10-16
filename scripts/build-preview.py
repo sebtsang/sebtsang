@@ -25,6 +25,6 @@ encoded=[f.quantize(palette=palette,dither=Image.Dither.NONE) for f in frames]
 corner_mask=Image.new('L',size,255)
 ImageDraw.Draw(corner_mask).rounded_rectangle((0,0,639,479),radius=12,fill=0)
 for f in encoded: f.paste(255,(0,0),corner_mask)
-output=Path('docs/court-preview-full-maple.gif')
+output=Path('docs/court-preview-fence.gif')
 encoded[0].save(output,save_all=True,append_images=encoded[1:],duration=[30,30,40]*36,loop=0,optimize=False,disposal=2,transparency=255,background=255)
 print(f'Encoded {len(frames)} frames: {output.stat().st_size:,} bytes')
