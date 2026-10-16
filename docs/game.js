@@ -100,13 +100,28 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  // Fence, trees and warm lamps: all art is drawn locally.
  for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#34373b');line([[x,37],[x+32,69],[x,91]],'#292c30')}line([[0,36],[480,36]],'#494d52',2);
  for(const x of [32,448]){rect(x,15,3,76,'#777c83');rect(x-7,14,17,4,'#e5e5df');rect(x-4,18,11,2,'#969a9e')}
- rect(16,94,448,250,'#45494e');rect(26,103,428,232,'#292c30');
- for(let y=107;y<335;y+=7)for(let x=29+(y%3);x<452;x+=13)rect(x,y,1,1,'#303338');
- line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#d8d8d2',2);
- rect(188,107,104,99,'#363a40');line([[188,107],[188,206],[292,206],[292,107]],'#d8d8d2',2);
- ctx.strokeStyle='#d8d8d2';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#d8d8d2',2);line([[411,107],[411,127]],'#d8d8d2',2);
+ rect(16,94,448,250,'#15171a');rect(26,103,428,232,'#c7a16d');
+ // Staggered maple planks, with restrained grain and seams.
+ const wood=['#cba675','#c6a06d','#cfac7c','#c8a370'];
+ for(let row=0,y=103;y<335;row++,y+=8){
+  for(let x=26-(row%3)*28;x<454;x+=84){
+   const left=Math.max(26,x),right=Math.min(454,x+84);
+   rect(left,y,right-left,Math.min(8,335-y),wood[(row+Math.floor((x+84)/84))%4]);
+   line([[left,y],[right,y]],'#af8c5b',.5);
+   if(x>26)line([[x,y],[x,Math.min(335,y+8)]],'#b18e5e',.5);
+  }
+ }
+ line([[31,330],[31,107],[449,107],[449,330],[31,330]],'#25272b',2);
+ rect(188,107,104,99,'#292c30');line([[188,107],[188,206],[292,206],[292,107]],'#f1f0ea',2);
+ ctx.strokeStyle='#25272b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#25272b',2);line([[411,107],[411,127]],'#25272b',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
- rect(237,48,6,63,'#111317');rect(202,64,76,46,'#1a1c20');rect(205,67,70,40,'#d8d8d2');rect(210,72,60,30,'#73787f');line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);
+ rect(237,48,6,63,'#111317');
+ // Transparent backboard with a pale frame, target and reflected light.
+ line([[202,110],[202,64],[278,64],[278,110]],'#101216',3);rect(205,67,70,40,'rgba(191,210,216,.22)');
+ line([[205,107],[205,67],[275,67],[275,107]],'#d8d8d2',2);
+ line([[211,76],[221,70]],'rgba(255,255,255,.20)',2);
+ line([[214,82],[234,70]],'rgba(255,255,255,.10)',2);
+ line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);
  ctx.fillStyle='#08090b66';ctx.beginPath();ctx.ellipse(ball.x,313,Math.max(4,13-(294-ball.y)*.02),3,0,0,Math.PI*2);ctx.fill();
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
@@ -139,7 +154,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   const y=rimY+2+row*6,t=row*6/25;
   line([[220+10*t,y],[260-10*t,y]],'#d8d8d2',1.5);
  }
- rect(218,rimY-2,44,3,'#c5c7ca');rect(220,rimY+1,40,2,'#7b8087');
+ rect(218,rimY-2,44,3,'#e78b42');rect(220,rimY+1,40,2,'#a94f28');
  if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(!captureMode&&phase==='ready')drawPrompt(drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER');
