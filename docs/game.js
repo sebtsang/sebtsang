@@ -145,8 +145,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#253b39');rect(0,0,W,91,'#1
  if(!captureMode&&phase==='ready')drawPrompt(drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER');
 
 }
-function drawPrompt(label){
- ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.lineWidth=3;
+function drawPrompt(label,size=10){
+ ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.lineWidth=3;
  ctx.strokeStyle='#203e32';ctx.strokeText(label,240,246);
  ctx.fillStyle='#fff2cd';ctx.fillText(label,240,246);
 }
@@ -162,7 +162,7 @@ export function capturePreviewFrames(start,count){
  for(let i=0;i<start+count;i++){
   if(clock>=.45&&!fired){shoot(0,433);fired=true}
   for(let j=0;j<4;j++)tick(1/120);
-  draw();drawPrompt('CLICK TO PLAY');
+  draw();drawPrompt('CLICK TO PLAY',12);
   if(i>=start)images.push(canvas.toDataURL('image/png').split(',')[1]);
  }
  Math.random=random;return images;
