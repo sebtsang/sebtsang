@@ -29,5 +29,5 @@ encoded=[f.quantize(palette=palette,dither=Image.Dither.NONE) for f in frames]
 corner_mask=Image.new('L',(640,360),255)
 ImageDraw.Draw(corner_mask).rounded_rectangle((0,0,639,359),radius=8,fill=0)
 for f in encoded: f.paste(255,(0,0),corner_mask)
-encoded[0].save('docs/preview.gif',save_all=True,append_images=encoded[1:],duration=[30,30,40]*36,loop=0,optimize=False,disposal=2,transparency=255,background=255)
-print(f'Encoded {len(frames)} frames: {Path("docs/preview.gif").stat().st_size:,} bytes')
+encoded[0].save('docs/basketball-preview.gif',save_all=True,append_images=encoded[1:],duration=[30,30,40]*36,loop=0,optimize=False,disposal=2,transparency=255,background=255)
+print(f'Encoded {len(frames)} frames: {Path("docs/basketball-preview.gif").stat().st_size:,} bytes')
