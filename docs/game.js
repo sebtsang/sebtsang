@@ -13,7 +13,14 @@ canvas.addEventListener('pointerdown',e=>{const p=point(e);if(phase!=='ready'||M
 canvas.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)drag.end=point(e)});
 canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const p=point(e);shoot(p.x-drag.start.x,drag.start.y-p.y,performance.now()-drag.time)});
 canvas.addEventListener('pointercancel',()=>{drag=null});canvas.addEventListener('lostpointercapture',()=>{drag=null});
-window.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();window.location.assign('https://github.com/sebtsang')}});
+let exiting=false;
+function exitGame(){if(exiting)return;exiting=true;window.location.assign('https://github.com/sebtsang')}
+function handleEscape(e){if(e.key==='Escape'||e.key==='Esc'||e.code==='Escape'){e.preventDefault();e.stopPropagation();exitGame()}}
+window.addEventListener('keydown',handleEscape,true);
+window.addEventListener('keyup',handleEscape,true);
+// Focus the game on entry and on every pointer interaction so keyboard controls work immediately.
+if(!new URLSearchParams(location.search).has('capture'))canvas.focus({preventScroll:true});
+canvas.addEventListener('pointerdown',()=>canvas.focus({preventScroll:true}));
 canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();shoot(0,120,260)}});
 function tick(dt){clock+=dt;net=Math.max(0,net-dt*2);if(phase==='flight'||phase==='result'){const oldY=ball.y;ball.vy+=gravity*dt;ball.x+=ball.vx*dt+ball.ax*dt*dt/2;ball.vx+=ball.ax*dt;ball.y+=ball.vy*dt;ball.rotation+=ball.vx*dt*.02;
  if(phase==='flight'){
