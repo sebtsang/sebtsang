@@ -156,8 +156,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   ctx.setLineDash([]);
  }
  const mesh=netShape();
- const rising=phase==='flight'&&ball.vy<0;
- if(!rising){
+ // Only a confirmed basket can pass behind the rim and mesh.
+ if(ball.scored){
   // Keep the scored ball inside the net silhouette until it emerges below it.
   ctx.save();
   if(ball.scored&&ball.y-ball.r<mesh.bottomY){
@@ -179,7 +179,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
   line([[center-halfWidth,y],[center+halfWidth,y]],netColor,1.5);
  }
  rect(218,rimY-2,44,3,'#e78b42');rect(220,rimY+1,40,2,'#a94f28');
- if(rising)drawBall(ball.x,ball.y,ball.r,ball.rotation);
+ if(!ball.scored)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(!captureMode&&phase==='ready')drawPrompt(drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER');
 

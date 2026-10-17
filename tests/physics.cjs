@@ -4,15 +4,20 @@ const assert = require('node:assert/strict');
 const animationLog=[];
 const nodes = Object.fromEntries(['made', 'streak', 'best', 'status'].map(id => [id, {textContent: '',animate:(frames,options)=>animationLog.push({id,frames,options})}]));
 const storage = {};
+const drawLog=[];
+const drawingContext=new Proxy({}, {get(target,key){
+ if(key==='createRadialGradient')return ()=>({addColorStop(){}});
+ return key in target?target[key]:(...args)=>drawLog.push([key,...args]);
+}});
 const context = {
- document: {querySelector: () => ({getContext: () => ({}), focus() {}, addEventListener() {}}), getElementById: id => nodes[id]},
+ document: {querySelector: () => ({getContext: () => drawingContext, focus() {}, addEventListener() {}}), getElementById: id => nodes[id]},
  window: {addEventListener() {}}, location: {search: ''}, URLSearchParams,
  localStorage: {getItem: key => storage[key], setItem: (key, value) => storage[key] = value},
  requestAnimationFrame() {}, Math, performance: {now: () => 0},
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('docs/game.js', 'utf8').replace('export function', 'function') + `
-globalThis.game = {shoot, tick, reset, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
+globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
 const game = context.game;
 function shot(vx, power) {
  game.reset(); game.shoot(vx, power);
@@ -73,3 +78,20 @@ assert.equal(game.state().phase,'ready','Interrupted hold cancels without shooti
 game.releaseDrag('wrong-id');
 assert.equal(game.state().phase,'ready');
 console.log('PASS: clean shots, power window, backboard rebounds, rim-ins, rim-outs, streaks, saved record, resets, drag/release, capped power, cancellation, and streak-based sweep speed.');
+
+function assertBallLayer(behind){
+ drawLog.length=0;game.draw();
+ const ballIndex=drawLog.findIndex(call=>call[0]==='arc');
+ const meshIndex=drawLog.findIndex(call=>call[0]==='moveTo'&&call[1]===220&&call[2]===106);
+ const rimIndex=drawLog.findIndex(call=>call[0]==='fillRect'&&call[1]===218&&call[2]===102);
+ assert.ok(ballIndex>=0&&meshIndex>=0&&rimIndex>=0);
+ assert.equal(ballIndex<meshIndex,behind,'Only scored balls draw behind the net');
+ assert.equal(ballIndex<rimIndex,behind,'Only scored balls draw behind the rim');
+}
+game.reset();game.shoot(0,382);
+while(game.state().ball.vy<0)game.tick(1/120);
+assert.equal(game.state().ball.scored,false);
+assertBallLayer(false);
+shot(0,433);assertBallLayer(true);
+shot(9.45,433);assertBallLayer(false);
+console.log('PASS: descending unscored shots and misses stay in front; confirmed baskets pass behind rim and net.');
