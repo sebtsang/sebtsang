@@ -8,7 +8,7 @@ const launchSpeed=Math.sqrt(433**2+2*gravity*hoopLift);
 let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0,aimPhase=-Math.PI/2,boardImpact={age:1,strength:0};
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
-function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433,groundY:null,groundV:0,floorHits:0,settled:false};boardImpact.age=1;phase='ready';drag=null}
+function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433,groundY:null,groundV:0,floorHits:0,settled:false,impactAge:1,squashStrength:0};boardImpact.age=1;phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
 function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:rimY,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
 function highlightScores(){
@@ -87,13 +87,14 @@ function floorContact(){
  }
  const impactSpeed=Math.max(0,ball.vy-ball.groundV);
  ball.floorHits++;ball.y=ball.groundY-ball.r;
+ ball.impactAge=0;ball.squashStrength=Math.min(1,impactSpeed/350);
  if(ball.floorHits>=3||impactSpeed<45){settleBall();return}
  ball.vy=ball.groundV-impactSpeed*.48;
  ball.vx*=.72;ball.groundV*=.7;
  ball.rotation+=.22*Math.sign(ball.vx||ball.groundV||1);
 }
 function tick(dt){
- clock+=dt;boardImpact.age+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt/1.1);
+ clock+=dt;boardImpact.age+=dt;ball.impactAge+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt/1.1);
  if(phase==='flight'||phase==='result'){
   const oldY=ball.y,oldDepth=ball.depth;
   if(ball.groundY!==null){
@@ -161,7 +162,27 @@ function netShape(){
  const spring=net>0?Math.exp(-4.5*age)*Math.sin(14*age):0;
  return {bottomY:rimY+27+16*spring,halfWidth:10+3*spring,sway:net>0?1.5*Math.exp(-5*age)*Math.sin(19*age):0};
 }
-function drawBall(x,y,r,rotation=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(rotation);ctx.fillStyle='#d98b52';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;ctx.stroke();line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+function ballDeformation(){
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+ const amount=reduced?0:ball.squashStrength*Math.max(0,1-ball.impactAge/.09)**2;
+ return {x:1+amount*.16,y:1-amount*.12};
+}
+function drawBall(x,y,r,rotation=0){
+ const shape=ballDeformation();
+ ctx.save();ctx.translate(Math.round(x),Math.round(y+r*(1-shape.y)));
+ // Compression stays aligned to the floor while the seams spin independently.
+ ctx.scale(shape.x,shape.y);
+ ctx.fillStyle='#d98b52';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+ ctx.save();ctx.clip();
+ rect(4,0,3,5,'#c78045');rect(1,5,5,2,'#c78045');
+ rect(-5,-6,4,2,'#efbb7b');rect(-6,-4,2,3,'#e6a568');ctx.restore();
+ ctx.strokeStyle='#6d422c';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
+ ctx.save();ctx.rotate(rotation);
+ line([[-r,0],[r,0]],'#74472d');line([[0,-r],[0,r]],'#74472d');
+ ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();
+ ctx.restore();ctx.restore();
+}
 function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#17191d');
  // Fence, trees and warm lamps: all art is drawn locally.
  for(let x=0;x<W;x+=16){line([[x,35],[x,91]],'#50555d');line([[x,37],[x+32,69],[x,91]],'#444951')}line([[0,36],[480,36]],'#686e77',2);

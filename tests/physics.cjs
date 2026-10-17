@@ -17,7 +17,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('docs/game.js', 'utf8').replace('export function', 'function') + `
-globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, floorSurface, centerAim:()=>{aimPhase=0}, hoop:{rimY,hoopLift,backboard}, state: () => ({phase, made, streak, best, ball})};`, context);
+globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, floorSurface, ballDeformation, centerAim:()=>{aimPhase=0}, hoop:{rimY,hoopLift,backboard}, state: () => ({phase, made, streak, best, ball})};`, context);
 const game = context.game;
 function shot(vx, power) {
  game.reset(); game.shoot(vx, power);
@@ -143,3 +143,13 @@ const glassBounce=bounceScenario(0,535);
 assert.equal(glassBounce.made,0);
 assert.ok(glassBounce.impacts[0].y>madeBounce.impacts[0].y,'Hard glass rebounds land toward the shooter');
 console.log('PASS: makes and misses land on court, lose bounce energy, follow rebound directions, avoid duplicate scores, and reset.');
+
+game.reset();game.shoot(0,433);
+for(let i=0;i<900&&game.state().ball.floorHits===0;i++)game.tick(1/120);
+const initialShape=game.ballDeformation();
+assert.ok(initialShape.x>1&&initialShape.y<1,'Floor impact briefly widens and flattens the ball');
+for(let i=0;i<16;i++)game.tick(1/120);
+assert.equal(game.ballDeformation().x,1);
+assert.equal(game.ballDeformation().y,1,'Ball quickly returns to a circle without changing collision radius');
+assert.equal(game.state().ball.r,9);
+console.log('PASS: floor-contact squash is brief, floor-aligned, and leaves collision geometry unchanged.');
