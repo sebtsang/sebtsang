@@ -104,14 +104,15 @@ console.log('PASS: descending unscored shots and misses stay in front; confirmed
 game.reset();game.shoot(0,490);
 for(let i=0;i<600&&game.state().ball.boardHits===0;i++)game.tick(1/120);
 assert.equal(game.state().ball.boardHits,1);
+assert.ok(game.state().ball.y+game.state().ball.r>=game.hoop.backboard.top&&game.state().ball.y-game.state().ball.r<=game.hoop.backboard.bottom,'Glass rebound begins at the current visible board height');
 assert.ok(game.state().ball.depthV<0,'Glass sends the ball back toward the shooter');
 assert.ok(game.state().ball.vy<0,'Glass contact visibly reverses the descending ball');
 for(let i=0;i<5;i++)game.tick(1/120);
 drawLog.length=0;game.draw();
-assert.ok(drawLog.some(c=>c[0]==='translate'&&c[2]===-game.hoop.hoopLift&&Math.abs(c[1])>0&&Math.abs(c[1])<2),'Only the backboard gets a small impact vibration');
+assert.ok(drawLog.some(c=>c[0]==='translate'&&c[2]===0&&Math.abs(c[1])>0&&Math.abs(c[1])<2),'Only the backboard gets a small impact vibration');
 for(let i=0;i<45;i++)game.tick(1/120);
 drawLog.length=0;game.draw();
-assert.ok(drawLog.some(c=>c[0]==='translate'&&c[1]===0&&c[2]===-game.hoop.hoopLift),'Board vibration settles quickly');
+assert.ok(drawLog.some(c=>c[0]==='translate'&&c[1]===0&&c[2]===0),'Board vibration settles quickly');
 console.log('PASS: glass reverses flight, sends ball toward shooter, supports bank shots, and briefly shakes the board.');
 
 function bounceScenario(vx,power){

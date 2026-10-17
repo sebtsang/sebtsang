@@ -1,7 +1,8 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
 const W=480,H=360,gravity=400,home={x:240,y:294};
-const hoopLift=39,rimY=104-hoopLift;
+const rimY=65,hoopLift=104-rimY;
+const rim={left:220,right:260,y:rimY,radius:3};
 const backboard={left:202,right:278,top:rimY-40,bottom:rimY+6};
 // Retain the same clearance above the rim after raising the hoop.
 const launchSpeed=Math.sqrt(433**2+2*gravity*hoopLift);
@@ -100,7 +101,7 @@ function floorContact(){
 function tick(dt){
  clock+=dt;boardImpact.age+=dt;ball.impactAge+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt/1.1);
  if(phase==='flight'||phase==='result'){
-  const oldY=ball.y,oldDepth=ball.depth;
+  const oldX=ball.x,oldY=ball.y,oldDepth=ball.depth;
   if(ball.groundY!==null){
    ball.groundY=Math.max(146,Math.min(292,ball.groundY+ball.groundV*dt));
    if(ball.groundY===146||ball.groundY===292)ball.groundV=0;
@@ -117,7 +118,11 @@ function tick(dt){
   if(phase==='flight'){
    // The backboard is behind the hoop. An overpowered shot reaches it
    // while still airborne and rebounds toward the shooter.
-   if(ball.depthV>0&&oldDepth<1.08&&ball.depth>=1.08&&ball.x>backboard.left-ball.r&&ball.x<backboard.right+ball.r&&ball.y+ball.r>=backboard.top&&ball.y-ball.r<=backboard.bottom){
+   const boardCrossing=ball.depthV>0&&oldDepth<1.08&&ball.depth>=1.08;
+   const boardFraction=boardCrossing?(1.08-oldDepth)/(ball.depth-oldDepth):0;
+   const boardX=oldX+(ball.x-oldX)*boardFraction,boardY=oldY+(ball.y-oldY)*boardFraction;
+   if(boardCrossing&&boardX>backboard.left-ball.r&&boardX<backboard.right+ball.r&&boardY+ball.r>=backboard.top&&boardY-ball.r<=backboard.bottom){
+    ball.x=boardX;ball.y=boardY;
     const impactSpeed=Math.abs(ball.vy);
     const rebound=.22+Math.min(.88,Math.max(0,ball.power-470)/100);
     ball.depth=1.08;ball.depthV*=-rebound;
@@ -131,13 +136,13 @@ function tick(dt){
    const atHoop=ball.depth>=.90&&ball.depth<=1.10;
    let collided=false;
    if(atHoop&&ball.vy>0){
-    for(const x of [220,260]){
-     const dx=ball.x-x,dy=ball.y-rimY,d=Math.hypot(dx,dy),contact=ball.r+3;
+    for(const x of [rim.left,rim.right]){
+     const dx=ball.x-x,dy=ball.y-rim.y,d=Math.hypot(dx,dy),contact=ball.r+rim.radius;
      if(d<contact&&d>0){
       const nx=dx/d,ny=dy/d,dot=ball.vx*nx+ball.vy*ny;
       if(dot<0){
        ball.vx-=1.82*dot*nx;ball.vy-=1.82*dot*ny;
-       ball.x=x+nx*contact;ball.y=rimY+ny*contact;
+       ball.x=x+nx*contact;ball.y=rim.y+ny*contact;
        ball.depth=1;ball.depthV=0;ball.rimHits++;collided=true;message('On the rim…');
       }
      }
@@ -222,13 +227,15 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#6
  ctx.save();
  const shake=boardImpact.age<.3&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
   ?Math.sin(boardImpact.age*95)*1.5*boardImpact.strength*Math.exp(-12*boardImpact.age):0;
- ctx.translate(shake,-hoopLift);
- // Transparent backboard with a pale frame, target and reflected light.
- line([[202,110],[202,64],[278,64],[278,110],[202,110]],'#101216',3);rect(205,67,70,40,'rgba(191,210,216,.22)');
- line([[205,107],[205,67],[275,67],[275,107],[205,107]],'#d8d8d2',2);
- line([[211,76],[221,70]],'rgba(255,255,255,.20)',2);
- line([[214,82],[234,70]],'rgba(255,255,255,.10)',2);
- line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);ctx.restore();
+ ctx.translate(shake,0);
+ // Draw the frame and glass directly from the same bounds used for rebounds.
+ const {left,right,top,bottom}=backboard;
+ line([[left,bottom],[left,top],[right,top],[right,bottom],[left,bottom]],'#101216',3);
+ rect(left+3,top+3,right-left-6,bottom-top-6,'rgba(191,210,216,.22)');
+ line([[left+3,bottom-3],[left+3,top+3],[right-3,top+3],[right-3,bottom-3],[left+3,bottom-3]],'#d8d8d2',2);
+ line([[left+9,top+12],[left+19,top+6]],'rgba(255,255,255,.20)',2);
+ line([[left+12,top+18],[left+32,top+6]],'rgba(255,255,255,.10)',2);
+ line([[228,rim.y],[228,rim.y-18],[252,rim.y-18],[252,rim.y]],'#f1f0ea',2);ctx.restore();
  const surface=floorSurface(),height=Math.max(0,surface-ball.r-ball.y);
  if(phase==='ready'||ball.groundY!==null||(ball.vy>0&&height<48)){
   const proximity=phase==='ready'?1:Math.max(0,1-height/55);
@@ -270,7 +277,7 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#6
   const halfWidth=20+(mesh.halfWidth-20)*t,center=240+mesh.sway*t;
   line([[center-halfWidth,y],[center+halfWidth,y]],netColor,1.5);
  }
- rect(218,rimY-2,44,3,'#e78b42');rect(220,rimY+1,40,2,'#a94f28');
+ rect(rim.left-2,rim.y-2,rim.right-rim.left+4,3,'#e78b42');rect(rim.left,rim.y+1,rim.right-rim.left,2,'#a94f28');
  if(!ball.scored)drawBall(ball.x,ball.y,ball.r,ball.rotation);
  for(const p of particles)rect(p.x,p.y,3,3,p.color);
  if(!captureMode&&phase==='ready')drawPrompt(drag?'RELEASE TO SHOOT':'DRAG UP FOR POWER');
