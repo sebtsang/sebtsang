@@ -245,8 +245,8 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#6
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
   const angle=Math.atan2(Math.sin(aimPhase)*aimWidth,home.y-rimY);
-  // End halfway between the baseline (107) and the paint midpoint (157).
-  const guideLimitY=132;
+  // Cap the visual guide at the middle of the paint.
+  const guideLimitY=157;
   const maxLength=(ball.y-guideLimitY)/Math.cos(angle);
   const length=powerLevel()*Math.min(fullPowerDrag,maxLength);
   const endX=ball.x+Math.sin(angle)*length;
