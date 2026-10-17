@@ -1,12 +1,16 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
-const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=104;
+const W=480,H=360,gravity=400,home={x:240,y:294};
+const hoopLift=24,rimY=104-hoopLift;
+const backboard={left:202,right:278,top:rimY-40,bottom:rimY+6};
+// Retain the same clearance above the rim after raising the hoop.
+const launchSpeed=Math.sqrt(433**2+2*gravity*hoopLift);
 let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0,aimPhase=-Math.PI/2,boardImpact={age:1,strength:0};
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433,groundY:null,groundV:0,floorHits:0,settled:false};boardImpact.age=1;phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:rimY,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
 function highlightScores(){
  if(captureMode||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
  for(const key of ['made','streak'])ui[key].animate?.([
@@ -16,7 +20,7 @@ function highlightScores(){
 }
 const fullPowerDrag=200;
 const aimWidth=58;
-const shotArrival=(433+Math.sqrt(433**2-2*gravity*(home.y-rimY)))/gravity;
+const shotArrival=(launchSpeed+Math.sqrt(launchSpeed**2-2*gravity*(home.y-rimY)))/gravity;
 function sweepSpeed(){return Math.min(3.8,1.25+streak*.18)}
 function aimVelocity(){return Math.sin(aimPhase)*aimWidth/shotArrival}
 function powerLevel(){return drag?Math.min(1,Math.max(0,(drag.startY-drag.endY)/fullPowerDrag)):0}
@@ -33,7 +37,7 @@ function releaseDrag(id){
 function cancelDrag(){drag=null;if(phase==='ready')message('Drag up for power. Release to shoot.')}
 function shoot(vx,power){
  if(phase!=='ready')return;
- ball.vx=vx;ball.vy=-433;ball.power=power;
+ ball.vx=vx;ball.vy=-launchSpeed;ball.power=power;
  ball.depthV=(Math.max(280,Math.min(590,power))/433)/shotArrival;
  phase='flight';shotStarted=clock;drag=null;message('…');
 }
@@ -108,7 +112,7 @@ function tick(dt){
   if(phase==='flight'){
    // The backboard is behind the hoop. An overpowered shot reaches it
    // while still airborne and rebounds toward the shooter.
-   if(ball.depthV>0&&oldDepth<1.08&&ball.depth>=1.08&&ball.x>202-ball.r&&ball.x<278+ball.r&&ball.y+ball.r>=64&&ball.y-ball.r<=110){
+   if(ball.depthV>0&&oldDepth<1.08&&ball.depth>=1.08&&ball.x>backboard.left-ball.r&&ball.x<backboard.right+ball.r&&ball.y+ball.r>=backboard.top&&ball.y-ball.r<=backboard.bottom){
     const impactSpeed=Math.abs(ball.vy);
     const rebound=.22+Math.min(.88,Math.max(0,ball.power-470)/100);
     ball.depth=1.08;ball.depthV*=-rebound;
@@ -185,12 +189,12 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  line([[188,107],[188,206],[292,206],[292,107]],'#25272b',2);
  ctx.strokeStyle='#25272b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#25272b',2);line([[411,107],[411,127]],'#25272b',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
- rect(237,48,6,63,'#111317');
+ rect(237,48-hoopLift,6,63+hoopLift,'#111317');
  // A glass impact briefly vibrates just the board; the court stays still.
  ctx.save();
  const shake=boardImpact.age<.3&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
   ?Math.sin(boardImpact.age*95)*1.5*boardImpact.strength*Math.exp(-12*boardImpact.age):0;
- ctx.translate(shake,0);
+ ctx.translate(shake,-hoopLift);
  // Transparent backboard with a pale frame, target and reflected light.
  line([[202,110],[202,64],[278,64],[278,110],[202,110]],'#101216',3);rect(205,67,70,40,'rgba(191,210,216,.22)');
  line([[205,107],[205,67],[275,67],[275,107],[205,107]],'#d8d8d2',2);
