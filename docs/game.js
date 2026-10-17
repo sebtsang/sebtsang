@@ -4,9 +4,9 @@ const W=480,H=360, gravity=400, home={x:240,y:294}, rimY=104;
 let made=0,streak=0,best=0,ball,phase='ready',drag=null,particles=[],resetAt=0,clock=0,net=0,last=0,acc=0,shotStarted=0,aimPhase=-Math.PI/2,boardImpact={age:1,strength:0};
 try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
-function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433};boardImpact.age=1;phase='ready';drag=null}
+function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433,groundY:null,groundV:0,floorHits:0,settled:false};boardImpact.age=1;phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=clock+(hit?1.6:1.15);if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:104,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
 function highlightScores(){
  if(captureMode||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
  for(const key of ['made','streak'])ui[key].animate?.([
@@ -62,12 +62,49 @@ canvas.addEventListener('keydown',e=>{
  }
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();releaseDrag('keyboard')}},true);
+function floorSurface(){
+ if(ball.groundY!==null)return ball.groundY;
+ const landingDepth=ball.scored?1:(ball.boardHits||ball.rimHits?ball.depth:ball.power/433*.85);
+ return 318-100*Math.max(0,Math.min(1.3,landingDepth));
+}
+function settleBall(){
+ ball.settled=true;ball.y=floorSurface()-ball.r;ball.vy=0;ball.groundV=0;
+ ball.vx*=.25;resetAt=clock+.35;
+}
+function floorContact(){
+ const surface=floorSurface();
+ if(ball.vy<=0||ball.y+ball.r<surface)return;
+ if(phase==='flight')finish(false);
+ if(ball.groundY===null){
+  ball.groundY=surface;
+  // Carry travel back from the glass into a small downcourt drift.
+  ball.groundV=Math.max(-30,Math.min(45,-ball.depthV*45));
+  ball.depthV=0;
+ }
+ const impactSpeed=Math.max(0,ball.vy-ball.groundV);
+ ball.floorHits++;ball.y=ball.groundY-ball.r;
+ if(ball.floorHits>=3||impactSpeed<45){settleBall();return}
+ ball.vy=ball.groundV-impactSpeed*.48;
+ ball.vx*=.72;ball.groundV*=.7;
+ ball.rotation+=.22*Math.sign(ball.vx||ball.groundV||1);
+}
 function tick(dt){
  clock+=dt;boardImpact.age+=dt;if(phase==='ready')aimPhase+=sweepSpeed()*dt;net=Math.max(0,net-dt/1.1);
  if(phase==='flight'||phase==='result'){
   const oldY=ball.y,oldDepth=ball.depth;
-  ball.vy+=gravity*dt;ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
-  ball.depth+=ball.depthV*dt;ball.rotation+=ball.vx*dt*.02;
+  if(ball.groundY!==null){
+   ball.groundY=Math.max(180,Math.min(322,ball.groundY+ball.groundV*dt));
+   if(ball.groundY===180||ball.groundY===322)ball.groundV=0;
+  }
+  if(ball.settled){
+   ball.x+=ball.vx*dt;ball.vx*=Math.exp(-9*dt);ball.y=floorSurface()-ball.r;
+  }else{
+   ball.vy+=gravity*dt;ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
+   ball.depth+=ball.depthV*dt;
+  }
+  // Keep rebounds on the visible court instead of losing the ball off-screen.
+  if(ball.x<35||ball.x>445){ball.x=Math.max(35,Math.min(445,ball.x));ball.vx*=-.5}
+  ball.rotation+=(ball.vx*.02+ball.groundV*.01)*dt;
   if(phase==='flight'){
    // The backboard is behind the hoop. An overpowered shot reaches it
    // while still airborne and rebounds toward the shooter.
@@ -101,7 +138,12 @@ function tick(dt){
    if(!collided&&ball.vy>0&&oldY<rimY&&ball.y>=rimY&&Math.abs(ball.x-240)<=7&&Math.abs(ball.depth-1)<=.055){
     ball.scored=true;finish(true);
    }
-   if(ball.y>H+20||ball.x<-30||ball.x>W+30||clock-shotStarted>5)finish(false);
+
+  }
+  if(!ball.settled)floorContact();
+  if(clock-shotStarted>8&&!ball.settled){
+   if(phase==='flight')finish(false);
+   ball.groundY=floorSurface();settleBall();
   }
   if(phase==='result'&&clock>=resetAt)reset();
  }
@@ -155,7 +197,12 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  line([[211,76],[221,70]],'rgba(255,255,255,.20)',2);
  line([[214,82],[234,70]],'rgba(255,255,255,.10)',2);
  line([[228,104],[228,86],[252,86],[252,104]],'#f1f0ea',2);ctx.restore();
- if(phase==='ready'){ctx.fillStyle='#08090b66';ctx.beginPath();ctx.ellipse(ball.x,313,13,3,0,0,Math.PI*2);ctx.fill();}
+ const surface=floorSurface(),height=Math.max(0,surface-ball.r-ball.y);
+ if(phase==='ready'||ball.groundY!==null||(ball.vy>0&&height<48)){
+  const proximity=phase==='ready'?1:Math.max(0,1-height/55);
+  ctx.fillStyle=`rgba(8,9,11,${.3*proximity})`;ctx.beginPath();
+  ctx.ellipse(ball.x,phase==='ready'?313:surface,7+5*proximity,2+proximity,0,0,Math.PI*2);ctx.fill();
+ }
  if(!captureMode&&phase==='ready'&&drag){
   // The drag sets the line length; the sweep alone sets its direction.
   const angle=Math.atan2(Math.sin(aimPhase)*aimWidth,home.y-rimY);

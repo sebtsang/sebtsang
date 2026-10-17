@@ -17,7 +17,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('docs/game.js', 'utf8').replace('export function', 'function') + `
-globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
+globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, floorSurface, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
 const game = context.game;
 function shot(vx, power) {
  game.reset(); game.shoot(vx, power);
@@ -108,3 +108,37 @@ for(let i=0;i<45;i++)game.tick(1/120);
 drawLog.length=0;game.draw();
 assert.ok(drawLog.some(c=>c[0]==='translate'&&c[1]===0&&c[2]===0),'Board vibration settles quickly');
 console.log('PASS: glass reverses flight, sends ball toward shooter, supports bank shots, and briefly shakes the board.');
+
+function bounceScenario(vx,power){
+ game.reset();const madeBefore=game.state().made;game.shoot(vx,power);
+ const impacts=[];let previousHits=0,returned=false;
+ for(let i=0;i<1200;i++){
+  game.tick(1/120);const state=game.state(),b=state.ball;
+  if(state.phase==='ready'){returned=true;break}
+  assert.ok(b.x>=35&&b.x<=445,'Ball remains on the visible court');
+  if(b.floorHits){assert.ok(b.y+b.r<=game.floorSurface()+.001,'Ball never penetrates the floor')}
+  if(b.floorHits>previousHits){
+   impacts.push({x:b.x,y:game.floorSurface(),speed:Math.max(0,b.groundV-b.vy),settled:b.settled});
+   previousHits=b.floorHits;
+  }
+ }
+ assert.ok(returned,'Shot resets after its floor bounces');
+ assert.ok(impacts.length>=2&&impacts.length<=3,'Ball has one or two visible rebounds before settling');
+ assert.ok(impacts[1].speed<impacts[0].speed,'Successive bounces lose energy');
+ assert.ok(impacts.every(hit=>hit.y>=180&&hit.y<=322),'Every landing is on the court');
+ return {impacts,made:game.state().made-madeBefore};
+}
+const madeBounce=bounceScenario(0,433);
+assert.equal(madeBounce.made,1,'Floor bounces never add extra baskets');
+assert.equal(madeBounce.impacts[0].x,240);
+assert.equal(madeBounce.impacts[0].y,218,'Makes drop beneath the hoop');
+const shortBounce=bounceScenario(0,382);
+assert.equal(shortBounce.made,0);
+assert.ok(shortBounce.impacts[0].y>madeBounce.impacts[0].y,'Short shots land closer to the shooter');
+const rimBounce=bounceScenario(9.45,433);
+assert.equal(rimBounce.made,0);
+assert.ok(Math.abs(rimBounce.impacts[0].x-240)>10,'Rim misses carry their sideways rebound to the floor');
+const glassBounce=bounceScenario(0,535);
+assert.equal(glassBounce.made,0);
+assert.ok(glassBounce.impacts[0].y>madeBounce.impacts[0].y,'Hard glass rebounds land toward the shooter');
+console.log('PASS: makes and misses land on court, lose bounce energy, follow rebound directions, avoid duplicate scores, and reset.');
