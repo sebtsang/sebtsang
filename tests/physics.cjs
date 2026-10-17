@@ -29,6 +29,7 @@ function shot(vx, power) {
 }
 let result = shot(0, 433);
 assert.equal(result.ball.scored, true, 'Centered, correctly powered shot scores');
+assert.match(nodes.status.textContent,/Nothing but net/,'Clean makes get a swish message');
 assert.deepEqual(animationLog.map(a=>a.id),['made','streak'],'Only score counters highlight on a make');
 assert.ok(animationLog.every(a=>a.options.duration<=600),'Highlights are brief');
 const restingNet=game.netShape().bottomY;
@@ -45,12 +46,16 @@ assert.equal(result.streak, 0);
 result = shot(0, 463);
 assert.ok(result.ball.boardHits > 0, 'Overpowered shot rebounds off backboard');
 assert.equal(result.ball.scored, true,'Controlled glass rebound can bank in');
+assert.match(nodes.status.textContent,/Banked it in|Glass, rim, and in/);
+assert.doesNotMatch(nodes.status.textContent,/Nothing but net/,'Bank shots never claim a swish');
 result = shot(0, 535);
 assert.ok(result.ball.boardHits > 0);
 assert.equal(result.ball.scored, false, 'Very strong shot cannot become an automatic bank shot');
 result = shot(7.35, 433);
 assert.ok(result.ball.rimHits > 0);
 assert.equal(result.ball.scored, true, 'An inward rim rebound can score');
+assert.match(nodes.status.textContent,/rim/);
+assert.doesNotMatch(nodes.status.textContent,/Nothing but net/,'Rim makes never claim a swish');
 result = shot(9.45, 433);
 assert.ok(result.ball.rimHits > 0);
 assert.equal(result.ball.scored, false, 'A slightly different rim impact bounces out');

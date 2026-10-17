@@ -1,7 +1,7 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
 const W=480,H=360,gravity=400,home={x:240,y:294};
-const hoopLift=34,rimY=104-hoopLift;
+const hoopLift=39,rimY=104-hoopLift;
 const backboard={left:202,right:278,top:rimY-40,bottom:rimY+6};
 // Retain the same clearance above the rim after raising the hoop.
 const launchSpeed=Math.sqrt(433**2+2*gravity*hoopLift);
@@ -10,7 +10,11 @@ try{best=Number(localStorage.getItem('half-court-best'))||0}catch{}
 function scores(){for(const [key,value] of Object.entries({made,streak,best}))ui[key].textContent=String(value).padStart(2,'0')}
 function reset(){ball={...home,vx:0,vy:0,ax:0,r:9,scored:false,rotation:0,depth:0,depthV:0,rimHits:0,boardHits:0,power:433,groundY:null,groundV:0,floorHits:0,settled:false,impactAge:1,squashStrength:0};boardImpact.age=1;phase='ready';drag=null}
 function message(s){ui.status.textContent=s}
-function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(streak>1?`${streak} in a row. Keep it going.`:'Nothing but net. Again?');net=1;for(let i=0;i<45;i++)particles.push({x:240,y:rimY,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
+function madeMessage(){
+ const shot=ball.boardHits?(ball.rimHits?'Glass, rim, and in.':'Banked it in.'):ball.rimHits?'Off the rim and in.':'Nothing but net.';
+ return `${shot} ${streak>1?`${streak} in a row.`:'Again?'}`;
+}
+function finish(hit){if(phase==='result')return;phase='result';resetAt=Infinity;if(hit){ball.ax=0;ball.vx=0;ball.x=240;ball.vy*=.35;ball.depth=1;ball.depthV=0;made++;streak++;best=Math.max(best,streak);if(!captureMode)try{localStorage.setItem('half-court-best',String(best))}catch{}message(madeMessage());net=1;for(let i=0;i<45;i++)particles.push({x:240,y:rimY,vx:(Math.random()-.5)*210,vy:-Math.random()*170-30,life:1.4+Math.random(),color:['#f5cf78','#eb9063','#a6cbb5'][i%3]})}else{streak=0;message('Next one’s yours.')}scores();if(hit)highlightScores()}
 function highlightScores(){
  if(captureMode||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
  for(const key of ['made','streak'])ui[key].animate?.([
@@ -185,11 +189,11 @@ function drawBall(x,y,r,rotation=0){
 }
 function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#697b89');
  // A quiet slate backdrop, diamond mesh and low lamps above the top rail.
- rect(0,36,W,56,'#53616d');
- ctx.save();ctx.beginPath();ctx.rect(0,37,W,54);ctx.clip();
- for(let x=-60;x<W+60;x+=24){line([[x,37],[x+54,91]],'#35414b');line([[x,37],[x-54,91]],'#35414b')}
+ rect(0,25,W,67,'#53616d');
+ ctx.save();ctx.beginPath();ctx.rect(0,26,W,65);ctx.clip();
+ for(let x=-60;x<W+60;x+=24){line([[x,26],[x+65,91]],'#35414b');line([[x,26],[x-65,91]],'#35414b')}
  ctx.restore();
- line([[0,36],[W,36]],'#303a43',2);line([[0,91],[W,91]],'#303a43',2);
+ line([[0,25],[W,25]],'#303a43',2);line([[0,91],[W,91]],'#303a43',2);
  for(const x of [32,448]){rect(x,28,3,64,'#303a43');rect(x-7,25,17,4,'#e5e5df');rect(x-4,29,11,2,'#a3acb1')}
  rect(16,94,448,250,'#303a43');rect(26,103,428,232,'#c7a16d');
  // Staggered maple planks, with restrained grain and seams.
