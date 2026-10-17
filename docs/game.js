@@ -189,7 +189,6 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#202226');rect(0,0,W,91,'#1
  line([[188,107],[188,206],[292,206],[292,107]],'#25272b',2);
  ctx.strokeStyle='#25272b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(240,206,52,29,0,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.ellipse(240,127,171,151,0,0,Math.PI);ctx.stroke();line([[69,107],[69,127]],'#25272b',2);line([[411,107],[411,127]],'#25272b',2);
  ctx.beginPath();ctx.ellipse(240,330,48,22,0,Math.PI,Math.PI*2);ctx.stroke();
- rect(237,48-hoopLift,6,63+hoopLift,'#111317');
  // A glass impact briefly vibrates just the board; the court stays still.
  ctx.save();
  const shake=boardImpact.age<.3&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
