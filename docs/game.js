@@ -187,14 +187,13 @@ function drawBall(x,y,r,rotation=0){
  ctx.beginPath();ctx.ellipse(0,0,r*.45,r,0,0,Math.PI*2);ctx.stroke();
  ctx.restore();ctx.restore();
 }
-function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#697b89');
- // A quiet slate backdrop, diamond mesh and low lamps above the top rail.
- rect(0,25,W,67,'#53616d');
- ctx.save();ctx.beginPath();ctx.rect(0,26,W,65);ctx.clip();
- for(let x=-60;x<W+60;x+=24){line([[x,26],[x+65,91]],'#35414b');line([[x,26],[x-65,91]],'#35414b')}
+function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');
+ // Full-height diamond mesh forms one continuous backdrop behind the hoop.
+ rect(0,0,W,92,'#53616d');
+ ctx.save();ctx.beginPath();ctx.rect(0,0,W,91);ctx.clip();
+ for(let x=-96;x<W+96;x+=24){line([[x,0],[x+91,91]],'#35414b');line([[x,0],[x-91,91]],'#35414b')}
  ctx.restore();
- line([[0,25],[W,25]],'#303a43',2);line([[0,91],[W,91]],'#303a43',2);
- for(const x of [32,448]){rect(x,28,3,64,'#303a43');rect(x-7,25,17,4,'#e5e5df');rect(x-4,29,11,2,'#a3acb1')}
+ line([[0,91],[W,91]],'#303a43',2);
  rect(16,94,448,250,'#303a43');rect(26,103,428,232,'#c7a16d');
  // Staggered maple planks, with restrained grain and seams.
  const wood=['#cba675','#c6a06d','#cfac7c','#c8a370'];
