@@ -65,7 +65,7 @@ window.addEventListener('keyup',e=>{if(e.code==='Space'){e.preventDefault();rele
 function floorSurface(){
  if(ball.groundY!==null)return ball.groundY;
  const landingDepth=ball.scored?1:(ball.boardHits||ball.rimHits?ball.depth:ball.power/433*.85);
- return 318-100*Math.max(0,Math.min(1.3,landingDepth));
+ return 276-100*Math.max(0,Math.min(1.3,landingDepth));
 }
 function settleBall(){
  ball.settled=true;ball.y=floorSurface()-ball.r;ball.vy=0;ball.groundV=0;
@@ -93,8 +93,8 @@ function tick(dt){
  if(phase==='flight'||phase==='result'){
   const oldY=ball.y,oldDepth=ball.depth;
   if(ball.groundY!==null){
-   ball.groundY=Math.max(180,Math.min(322,ball.groundY+ball.groundV*dt));
-   if(ball.groundY===180||ball.groundY===322)ball.groundV=0;
+   ball.groundY=Math.max(146,Math.min(292,ball.groundY+ball.groundV*dt));
+   if(ball.groundY===146||ball.groundY===292)ball.groundV=0;
   }
   if(ball.settled){
    ball.x+=ball.vx*dt;ball.vx*=Math.exp(-9*dt);ball.y=floorSurface()-ball.r;

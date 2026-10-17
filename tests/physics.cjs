@@ -125,13 +125,14 @@ function bounceScenario(vx,power){
  assert.ok(returned,'Shot resets after its floor bounces');
  assert.ok(impacts.length>=2&&impacts.length<=3,'Ball has one or two visible rebounds before settling');
  assert.ok(impacts[1].speed<impacts[0].speed,'Successive bounces lose energy');
- assert.ok(impacts.every(hit=>hit.y>=180&&hit.y<=322),'Every landing is on the court');
+ assert.ok(impacts.every(hit=>hit.y>=146&&hit.y<=292),'Every landing is on the court');
  return {impacts,made:game.state().made-madeBefore};
 }
 const madeBounce=bounceScenario(0,433);
 assert.equal(madeBounce.made,1,'Floor bounces never add extra baskets');
 assert.equal(madeBounce.impacts[0].x,240);
-assert.equal(madeBounce.impacts[0].y,218,'Makes drop beneath the hoop');
+assert.equal(madeBounce.impacts[0].y,176,'Makes land inside the paint, above the free-throw line');
+assert.ok(madeBounce.impacts.every(hit=>hit.y<206),'Made-shot bounces stay inside the paint');
 const shortBounce=bounceScenario(0,382);
 assert.equal(shortBounce.made,0);
 assert.ok(shortBounce.impacts[0].y>madeBounce.impacts[0].y,'Short shots land closer to the shooter');
