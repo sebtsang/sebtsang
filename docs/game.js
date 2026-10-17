@@ -1,7 +1,7 @@
 const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
 const ui=Object.fromEntries(['made','streak','best','status'].map(id=>[id,document.getElementById(id)]));
 const W=480,H=360,gravity=400,home={x:240,y:294};
-const hoopLift=24,rimY=104-hoopLift;
+const hoopLift=34,rimY=104-hoopLift;
 const backboard={left:202,right:278,top:rimY-40,bottom:rimY+6};
 // Retain the same clearance above the rim after raising the hoop.
 const launchSpeed=Math.sqrt(433**2+2*gravity*hoopLift);

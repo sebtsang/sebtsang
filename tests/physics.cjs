@@ -17,7 +17,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('docs/game.js', 'utf8').replace('export function', 'function') + `
-globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, floorSurface, centerAim:()=>{aimPhase=0}, state: () => ({phase, made, streak, best, ball})};`, context);
+globalThis.game = {shoot, tick, reset, draw, beginDrag, updateDrag, releaseDrag, cancelDrag, powerLevel, sweepSpeed, aimVelocity, netShape, floorSurface, centerAim:()=>{aimPhase=0}, hoop:{rimY,hoopLift,backboard}, state: () => ({phase, made, streak, best, ball})};`, context);
 const game = context.game;
 function shot(vx, power) {
  game.reset(); game.shoot(vx, power);
@@ -82,8 +82,8 @@ console.log('PASS: clean shots, power window, backboard rebounds, rim-ins, rim-o
 function assertBallLayer(behind){
  drawLog.length=0;game.draw();
  const ballIndex=drawLog.findIndex(call=>call[0]==='arc');
- const meshIndex=drawLog.findIndex(call=>call[0]==='moveTo'&&call[1]===220&&call[2]===82);
- const rimIndex=drawLog.findIndex(call=>call[0]==='fillRect'&&call[1]===218&&call[2]===78);
+ const meshIndex=drawLog.findIndex(call=>call[0]==='moveTo'&&call[1]===220&&call[2]===game.hoop.rimY+2);
+ const rimIndex=drawLog.findIndex(call=>call[0]==='fillRect'&&call[1]===218&&call[2]===game.hoop.rimY-2);
  assert.ok(ballIndex>=0&&meshIndex>=0&&rimIndex>=0);
  assert.equal(ballIndex<meshIndex,behind,'Only scored balls draw behind the net');
  assert.equal(ballIndex<rimIndex,behind,'Only scored balls draw behind the rim');
@@ -103,10 +103,10 @@ assert.ok(game.state().ball.depthV<0,'Glass sends the ball back toward the shoot
 assert.ok(game.state().ball.vy<0,'Glass contact visibly reverses the descending ball');
 for(let i=0;i<5;i++)game.tick(1/120);
 drawLog.length=0;game.draw();
-assert.ok(drawLog.some(c=>c[0]==='translate'&&c[2]===-24&&Math.abs(c[1])>0&&Math.abs(c[1])<2),'Only the backboard gets a small impact vibration');
+assert.ok(drawLog.some(c=>c[0]==='translate'&&c[2]===-game.hoop.hoopLift&&Math.abs(c[1])>0&&Math.abs(c[1])<2),'Only the backboard gets a small impact vibration');
 for(let i=0;i<45;i++)game.tick(1/120);
 drawLog.length=0;game.draw();
-assert.ok(drawLog.some(c=>c[0]==='translate'&&c[1]===0&&c[2]===-24),'Board vibration settles quickly');
+assert.ok(drawLog.some(c=>c[0]==='translate'&&c[1]===0&&c[2]===-game.hoop.hoopLift),'Board vibration settles quickly');
 console.log('PASS: glass reverses flight, sends ball toward shooter, supports bank shots, and briefly shakes the board.');
 
 function bounceScenario(vx,power){
