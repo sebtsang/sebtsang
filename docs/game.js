@@ -285,9 +285,12 @@ function draw(){ctx.clearRect(0,0,W,H);rect(0,0,W,H,'#44535f');rect(0,0,W,91,'#6
 
 }
 function drawPrompt(label,size=10){
+ ctx.save();
  ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.lineWidth=3;
+ ctx.lineJoin='round';ctx.miterLimit=2;
  ctx.strokeStyle='#202226';ctx.strokeText(label,240,255);
  ctx.fillStyle='#f1f0ea';ctx.fillText(label,240,255);
+ ctx.restore();
 }
 function frame(time){if(!last)last=time;acc+=Math.min((time-last)/1000,.05);last=time;while(acc>=1/120){tick(1/120);acc-=1/120}draw();requestAnimationFrame(frame)}
 scores();reset();
